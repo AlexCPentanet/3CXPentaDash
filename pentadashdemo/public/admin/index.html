@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Pentanet Dashboard</title>
+    <link rel="stylesheet" href="../css/wallboard.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="theme-dark">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <img src="../assets/pentanet-logo.png" alt="Pentanet" class="logo" onerror="this.style.display='none'">
+            <h1 class="dashboard-title">Admin Panel</h1>
+        </div>
+        <div class="nav-right">
+            <span class="user-info" id="user-info">Admin User</span>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                <span class="theme-icon">☀️</span>
+            </button>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Admin Layout -->
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <a href="#dashboard" class="nav-item active" onclick="showAdminTab('dashboard')">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+                <a href="#api-config" class="nav-item" onclick="showAdminTab('api-config')">
+                    <span class="nav-icon">🔌</span>
+                    <span class="nav-label">3CX API Config</span>
+                </a>
+                <a href="#email-config" class="nav-item" onclick="showAdminTab('email-config')">
+                    <span class="nav-icon">📧</span>
+                    <span class="nav-label">Email Settings</span>
+                </a>
+                <a href="#branding" class="nav-item" onclick="showAdminTab('branding')">
+                    <span class="nav-icon">🎨</span>
+                    <span class="nav-label">Branding & Colors</span>
+                </a>
+                <a href="#users" class="nav-item" onclick="showAdminTab('users')">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-label">User Management</span>
+                </a>
+                <a href="#permissions" class="nav-item" onclick="showAdminTab('permissions')">
+                    <span class="nav-icon">🔐</span>
+                    <span class="nav-label">Permissions</span>
+                </a>
+                <a href="#keywords" class="nav-item" onclick="showAdminTab('keywords')">
+                    <span class="nav-icon">🔍</span>
+                    <span class="nav-label">Keyword Management</span>
+                </a>
+                <a href="#towers" class="nav-item" onclick="showAdminTab('towers')">
+                    <span class="nav-icon">📡</span>
+                    <span class="nav-label">Tower Locations</span>
+                </a>
+                <a href="#alerts" class="nav-item" onclick="showAdminTab('alerts')">
+                    <span class="nav-icon">⚠️</span>
+                    <span class="nav-label">Alert Settings</span>
+                </a>
+                <a href="#maps" class="nav-item" onclick="showAdminTab('maps')">
+                    <span class="nav-icon">🗺️</span>
+                    <span class="nav-label">Map Configuration</span>
+                </a>
+                <a href="#widgets" class="nav-item" onclick="showAdminTab('widgets')">
+                    <span class="nav-icon">📐</span>
+                    <span class="nav-label">Widget Settings</span>
+                </a>
+                <a href="#system" class="nav-item" onclick="showAdminTab('system')">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">System Settings</span>
+                </a>
+                <a href="#audit" class="nav-item" onclick="showAdminTab('audit')">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-label">Audit Log</span>
+                </a>
+                <div class="nav-divider"></div>
+                <a href="/" class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">Public Dashboard</span>
+                </a>
+                <a href="/manager" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Manager Dashboard</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <!-- Dashboard Tab -->
+            <div class="admin-tab active" id="tab-dashboard">
+                <div class="tab-header">
+                    <h2>Admin Dashboard</h2>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon users"></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Users</div>
+                            <div class="stat-value" id="stat-users">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon flagged"></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Flagged Calls (Today)</div>
+                            <div class="stat-value" id="stat-flagged">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon towers"></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Active Towers</div>
+                            <div class="stat-value" id="stat-towers">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon alerts"></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Active Alerts</div>
+                            <div class="stat-value danger" id="stat-alerts">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Recent Admin Activity</h3>
+                    </div>
+                    <div class="panel-content">
+                        <div class="activity-timeline" id="admin-activity">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Health -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>System Health</h3>
+                        <button class="btn-icon" onclick="refreshSystemHealth()">🔄</button>
+                    </div>
+                    <div class="panel-content">
+                        <div class="health-grid">
+                            <div class="health-item">
+                                <div class="health-label">3CX Connection</div>
+                                <div class="health-status" id="health-3cx">
+                                    <span class="status-dot loading"></span>
+                                    <span>Checking...</span>
+                                </div>
+                            </div>
+                            <div class="health-item">
+                                <div class="health-label">WebSocket</div>
+                                <div class="health-status" id="health-ws">
+                                    <span class="status-dot loading"></span>
+                                    <span>Checking...</span>
+                                </div>
+                            </div>
+                            <div class="health-item">
+                                <div class="health-label">Database</div>
+                                <div class="health-status" id="health-db">
+                                    <span class="status-dot loading"></span>
+                                    <span>Checking...</span>
+                                </div>
+                            </div>
+                            <div class="health-item">
+                                <div class="health-label">Email Service</div>
+                                <div class="health-status" id="health-email">
+                                    <span class="status-dot loading"></span>
+                                    <span>Checking...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3CX API Config Tab -->
+            <div class="admin-tab" id="tab-api-config">
+                <div class="tab-header">
+                    <h2>3CX API Configuration</h2>
+                    <button class="btn-primary" onclick="saveAPIConfig()">Save Changes</button>
+                </div>
+
+                <div class="config-section">
+                    <h3>Configuration API (XAPI)</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>3CX FQDN</label>
+                            <input type="text" id="tcx-fqdn" value="pentanet.3cx.com.au" readonly>
+                            <small>Server fully qualified domain name</small>
+                        </div>
+                        <div class="form-group">
+                            <label>HTTPS Port</label>
+                            <input type="number" id="tcx-port" value="5001">
+                            <small>Default: 5001</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Client ID</label>
+                            <input type="text" id="xapi-client-id" placeholder="e.g., 900">
+                            <small>Service Principal extension number</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Client Secret</label>
+                            <input type="password" id="xapi-client-secret" placeholder="Enter API key">
+                            <small>Generated when creating Service Principal</small>
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="testXAPIConnection()">Test XAPI Connection</button>
+                    <div id="xapi-test-result" class="test-result"></div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Call Control API</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Client ID</label>
+                            <input type="text" id="callcontrol-client-id" placeholder="e.g., 901">
+                            <small>Call Control Service Principal</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Client Secret</label>
+                            <input type="password" id="callcontrol-client-secret" placeholder="Enter API key">
+                        </div>
+                        <div class="form-group">
+                            <label>Extensions to Monitor</label>
+                            <input type="text" id="monitor-extensions" placeholder="100,101,102,103">
+                            <small>Comma-separated extension numbers</small>
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="testCallControlConnection()">Test Call Control Connection</button>
+                    <div id="callcontrol-test-result" class="test-result"></div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Recording Storage</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>SMB Server</label>
+                            <input type="text" id="smb-server" value="10.71.80.203">
+                        </div>
+                        <div class="form-group">
+                            <label>Share Name</label>
+                            <input type="text" id="smb-share" value="CallRecordings">
+                        </div>
+                        <div class="form-group">
+                            <label>Domain</label>
+                            <input type="text" id="smb-domain" value="PENTANET">
+                        </div>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="smb-username" value="svc.callrecordings">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="smb-password" placeholder="Enter password">
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="testSMBConnection()">Test SMB Connection</button>
+                    <div id="smb-test-result" class="test-result"></div>
+                </div>
+            </div>
+
+            <!-- Email Config Tab -->
+            <div class="admin-tab" id="tab-email-config">
+                <div class="tab-header">
+                    <h2>Email Configuration</h2>
+                    <button class="btn-primary" onclick="saveEmailConfig()">Save Changes</button>
+                </div>
+
+                <div class="config-section">
+                    <h3>SMTP Settings</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>SMTP Host</label>
+                            <input type="text" id="smtp-host" placeholder="smtp.gmail.com">
+                        </div>
+                        <div class="form-group">
+                            <label>SMTP Port</label>
+                            <select id="smtp-port">
+                                <option value="587">587 (TLS - Recommended)</option>
+                                <option value="465">465 (SSL)</option>
+                                <option value="25">25 (Unencrypted)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="smtp-username" placeholder="your-email@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="smtp-password" placeholder="App password">
+                            <small>Use app-specific password for Gmail/Microsoft 365</small>
+                        </div>
+                        <div class="form-group">
+                            <label>From Name</label>
+                            <input type="text" id="smtp-from-name" value="Pentanet Dashboard">
+                        </div>
+                        <div class="form-group">
+                            <label>From Email</label>
+                            <input type="email" id="smtp-from-email" placeholder="alerts@pentanet.com.au">
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="sendTestEmail()">Send Test Email</button>
+                    <div id="email-test-result" class="test-result"></div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Alert Recipients</h3>
+                    <div class="recipient-manager">
+                        <div class="form-group">
+                            <label>Add Recipient</label>
+                            <div class="input-with-button">
+                                <input type="email" id="new-recipient-email" placeholder="email@pentanet.com.au">
+                                <button class="btn-primary" onclick="addRecipient()">Add</button>
+                            </div>
+                        </div>
+                        <div class="recipient-list" id="recipient-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Email Alert Settings</h3>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="alert-high-severity" checked>
+                            <span>Send alerts for high severity flagged calls</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="alert-medium-severity">
+                            <span>Send alerts for medium severity flagged calls</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="alert-tio-mentions" checked>
+                            <span>Send immediate alerts for TIO mentions</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="alert-tower-incidents" checked>
+                            <span>Send alerts for tower incidents (fire/flood/power)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-recording" checked>
+                            <span>Include call recording in email</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-transcript" checked>
+                            <span>Include transcript in email</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-sentiment" checked>
+                            <span>Include sentiment analysis in email</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Weekly Report Settings</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Send Weekly Report</label>
+                            <select id="weekly-report-enabled">
+                                <option value="true">Enabled</option>
+                                <option value="false">Disabled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Send Day</label>
+                            <select id="weekly-report-day">
+                                <option value="1">Monday</option>
+                                <option value="2">Tuesday</option>
+                                <option value="3">Wednesday</option>
+                                <option value="4">Thursday</option>
+                                <option value="5">Friday</option>
+                                <option value="6">Saturday</option>
+                                <option value="0">Sunday</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Send Time</label>
+                            <input type="time" id="weekly-report-time" value="09:00">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Branding & Colors Tab -->
+            <div class="admin-tab" id="tab-branding">
+                <div class="tab-header">
+                    <h2>Branding & Colors</h2>
+                    <button class="btn-primary" onclick="saveBranding()">Save Changes</button>
+                </div>
+
+                <div class="config-section">
+                    <h3>Company Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Company Name</label>
+                            <input type="text" id="company-name" value="Pentanet">
+                        </div>
+                        <div class="form-group">
+                            <label>Dashboard Title</label>
+                            <input type="text" id="dashboard-title" value="Call Center Dashboard">
+                        </div>
+                        <div class="form-group">
+                            <label>Support Email</label>
+                            <input type="email" id="support-email" value="stephen@pentanet.com.au">
+                        </div>
+                        <div class="form-group">
+                            <label>Support Phone</label>
+                            <input type="tel" id="support-phone" value="(08) 6118 9000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Logo Upload</h3>
+                    <div class="logo-upload">
+                        <div class="logo-preview">
+                            <img id="logo-preview" src="../assets/pentanet-logo.png" alt="Logo Preview" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%2280%22%3E%3Crect fill=%22%231A2332%22 width=%22200%22 height=%2280%22/%3E%3Ctext x=%22100%22 y=%2245%22 text-anchor=%22middle%22 fill=%22%23A0AEC0%22 font-size=%2214%22%3ENo Logo%3C/text%3E%3C/svg%3E'">
+                        </div>
+                        <div class="logo-actions">
+                            <input type="file" id="logo-file" accept="image/*" onchange="previewLogo(this)" style="display: none;">
+                            <button class="btn-secondary" onclick="document.getElementById('logo-file').click()">Choose File</button>
+                            <button class="btn-secondary" onclick="removeLogo()">Remove Logo</button>
+                            <small>Recommended: PNG or SVG, max 200x80px</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Color Scheme</h3>
+                    <div class="color-grid">
+                        <div class="color-picker-group">
+                            <label>Primary Color</label>
+                            <div class="color-input">
+                                <input type="color" id="color-primary" value="#0052CC">
+                                <input type="text" id="color-primary-hex" value="#0052CC" readonly>
+                            </div>
+                        </div>
+                        <div class="color-picker-group">
+                            <label>Secondary Color</label>
+                            <div class="color-input">
+                                <input type="color" id="color-secondary" value="#00A3E0">
+                                <input type="text" id="color-secondary-hex" value="#00A3E0" readonly>
+                            </div>
+                        </div>
+                        <div class="color-picker-group">
+                            <label>Success Color</label>
+                            <div class="color-input">
+                                <input type="color" id="color-success" value="#00C48C">
+                                <input type="text" id="color-success-hex" value="#00C48C" readonly>
+                            </div>
+                        </div>
+                        <div class="color-picker-group">
+                            <label>Warning Color</label>
+                            <div class="color-input">
+                                <input type="color" id="color-warning" value="#FF9800">
+                                <input type="text" id="color-warning-hex" value="#FF9800" readonly>
+                            </div>
+                        </div>
+                        <div class="color-picker-group">
+                            <label>Danger Color</label>
+                            <div class="color-input">
+                                <input type="color" id="color-danger" value="#F44336">
+                                <input type="text" id="color-danger-hex" value="#F44336" readonly>
+                            </div>
+                        </div>
+                        <div class="color-picker-group">
+                            <label>Accent Color</label>
+                            <div class="color-input">
+                                <input type="color" id="color-accent" value="#00D4FF">
+                                <input type="text" id="color-accent-hex" value="#00D4FF" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="resetColors()">Reset to Defaults</button>
+                    <button class="btn-secondary" onclick="previewColors()">Preview Changes</button>
+                </div>
+            </div>
+
+            <!-- User Management Tab -->
+            <div class="admin-tab" id="tab-users">
+                <div class="tab-header">
+                    <h2>User Management</h2>
+                    <button class="btn-primary" onclick="showCreateUserModal()">Create New User</button>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Users</h3>
+                        <div class="search-box">
+                            <input type="text" placeholder="Search users..." onkeyup="filterUsers(this.value)">
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <table class="data-table" id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Departments</th>
+                                    <th>2FA</th>
+                                    <th>Last Login</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permissions Tab -->
+            <div class="admin-tab" id="tab-permissions">
+                <div class="tab-header">
+                    <h2>Permissions Management</h2>
+                </div>
+
+                <div class="permissions-grid">
+                    <div class="permission-card">
+                        <h3>Viewer Role</h3>
+                        <p>Can access public wallboard only</p>
+                        <div class="permission-list">
+                            <div class="permission-item">✓ View live dashboard</div>
+                            <div class="permission-item">✓ View agent status</div>
+                            <div class="permission-item">✓ View queue metrics</div>
+                            <div class="permission-item disabled">✗ Access recordings</div>
+                            <div class="permission-item disabled">✗ View flagged calls</div>
+                            <div class="permission-item disabled">✗ Generate reports</div>
+                        </div>
+                    </div>
+
+                    <div class="permission-card">
+                        <h3>Manager Role</h3>
+                        <p>Full access to monitoring and reports</p>
+                        <div class="permission-list">
+                            <div class="permission-item">✓ All viewer permissions</div>
+                            <div class="permission-item">✓ Access recordings</div>
+                            <div class="permission-item">✓ View & review flagged calls</div>
+                            <div class="permission-item">✓ Generate reports</div>
+                            <div class="permission-item">✓ View agent analytics</div>
+                            <div class="permission-item">✓ Department filtering</div>
+                            <div class="permission-item disabled">✗ System configuration</div>
+                            <div class="permission-item disabled">✗ User management</div>
+                        </div>
+                    </div>
+
+                    <div class="permission-card highlighted">
+                        <h3>Admin Role</h3>
+                        <p>Full system access and configuration</p>
+                        <div class="permission-list">
+                            <div class="permission-item">✓ All manager permissions</div>
+                            <div class="permission-item">✓ System configuration</div>
+                            <div class="permission-item">✓ User management</div>
+                            <div class="permission-item">✓ Permission management</div>
+                            <div class="permission-item">✓ API configuration</div>
+                            <div class="permission-item">✓ Email settings</div>
+                            <div class="permission-item">✓ Branding customization</div>
+                            <div class="permission-item">✓ Audit log access</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>IP Whitelist</h3>
+                        <button class="btn-secondary" onclick="addIPWhitelist()">Add IP Address</button>
+                    </div>
+                    <div class="panel-content">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-ip-whitelist">
+                                <span>Enable IP Whitelist (Blocks all IPs not on the list)</span>
+                            </label>
+                        </div>
+                        <table class="data-table" id="whitelist-table">
+                            <thead>
+                                <tr>
+                                    <th>IP Address</th>
+                                    <th>Description</th>
+                                    <th>Added By</th>
+                                    <th>Date Added</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keywords Tab -->
+            <div class="admin-tab" id="tab-keywords">
+                <div class="tab-header">
+                    <h2>Keyword Management</h2>
+                    <button class="btn-primary" onclick="saveKeywords()">Save Changes</button>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Keyword Detection:</strong> Calls are automatically flagged when transcripts contain these keywords. Configure severity levels to control alerting.
+                </div>
+
+                <div class="keywords-grid">
+                    <div class="keyword-section">
+                        <div class="section-header danger">
+                            <h3>High Severity Keywords</h3>
+                            <span class="badge">Immediate Alert</span>
+                        </div>
+                        <textarea id="keywords-high" rows="10" placeholder="Enter keywords, one per line&#10;&#10;Examples:&#10;lawsuit&#10;lawyer&#10;TIO&#10;telecommunications industry ombudsman&#10;legal action"></textarea>
+                        <small>These trigger immediate email alerts</small>
+                    </div>
+
+                    <div class="keyword-section">
+                        <div class="section-header warning">
+                            <h3>Medium Severity Keywords</h3>
+                            <span class="badge">Daily Digest</span>
+                        </div>
+                        <textarea id="keywords-medium" rows="10" placeholder="Enter keywords, one per line&#10;&#10;Examples:&#10;complaint&#10;frustrated&#10;manager&#10;supervisor&#10;escalate"></textarea>
+                        <small>Included in daily digest emails</small>
+                    </div>
+
+                    <div class="keyword-section">
+                        <div class="section-header info">
+                            <h3>Low Severity Keywords</h3>
+                            <span class="badge">Log Only</span>
+                        </div>
+                        <textarea id="keywords-low" rows="10" placeholder="Enter keywords, one per line&#10;&#10;Examples:&#10;slow&#10;expensive&#10;disappointed&#10;unsatisfied"></textarea>
+                        <small>Logged for review, no email alerts</small>
+                    </div>
+
+                    <div class="keyword-section">
+                        <div class="section-header success">
+                            <h3>Positive Keywords</h3>
+                            <span class="badge">Coaching Tool</span>
+                        </div>
+                        <textarea id="keywords-positive" rows="10" placeholder="Enter keywords, one per line&#10;&#10;Examples:&#10;thank you&#10;excellent&#10;appreciate&#10;helpful&#10;satisfied"></textarea>
+                        <small>Used for positive sentiment tracking</small>
+                    </div>
+                </div>
+
+                <button class="btn-secondary" onclick="importKeywords()">Import from CSV</button>
+                <button class="btn-secondary" onclick="exportKeywords()">Export to CSV</button>
+            </div>
+
+            <!-- Continue in next message due to length... -->
+        </main>
+    </div>
+
+    <script src="../js/wallboard-app.js"></script>
+    <script src="../js/admin-app.js"></script>
+</body>
+</html>

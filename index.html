@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Centre Wallboard - 3CX V20</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header with Branding -->
+    <header class="wallboard-header">
+        <div class="logo-container">
+            <img src="logo.png" alt="Company Logo" id="companyLogo" class="company-logo">
+        </div>
+        <h1 class="wallboard-title" id="wallboardTitle">Call Centre Dashboard</h1>
+        <div class="date-time">
+            <div id="currentDate" class="current-date"></div>
+            <div id="currentTime" class="current-time"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="wallboard-main">
+        <!-- Key Performance Indicators with Sparklines -->
+        <section class="kpi-section">
+            <div class="kpi-card" data-trend="up">
+                <div class="kpi-header">
+                    <div class="kpi-icon">📞</div>
+                    <canvas class="kpi-sparkline" id="sparkline-activeCalls"></canvas>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" id="activeCalls">0</div>
+                    <div class="kpi-label">Active Calls</div>
+                    <div class="kpi-change positive" id="activeCalls-change">+0</div>
+                </div>
+            </div>
+            <div class="kpi-card" data-trend="stable">
+                <div class="kpi-header">
+                    <div class="kpi-icon">⏱️</div>
+                    <canvas class="kpi-sparkline" id="sparkline-waitingCalls"></canvas>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" id="waitingCalls">0</div>
+                    <div class="kpi-label">Calls Waiting</div>
+                    <div class="kpi-change neutral" id="waitingCalls-change">0</div>
+                </div>
+            </div>
+            <div class="kpi-card" data-trend="up">
+                <div class="kpi-header">
+                    <div class="kpi-icon">👥</div>
+                    <canvas class="kpi-sparkline" id="sparkline-availableAgents"></canvas>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" id="availableAgents">0</div>
+                    <div class="kpi-label">Available Agents</div>
+                    <div class="kpi-change positive" id="availableAgents-change">+0</div>
+                </div>
+            </div>
+            <div class="kpi-card" data-trend="down">
+                <div class="kpi-header">
+                    <div class="kpi-icon">⏰</div>
+                    <canvas class="kpi-sparkline" id="sparkline-avgWaitTime"></canvas>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" id="avgWaitTime">00:00</div>
+                    <div class="kpi-label">Avg Wait Time</div>
+                    <div class="kpi-change positive" id="avgWaitTime-change">-5s</div>
+                </div>
+            </div>
+            <div class="kpi-card" data-trend="up">
+                <div class="kpi-header">
+                    <div class="kpi-icon">✅</div>
+                    <canvas class="kpi-sparkline" id="sparkline-answeredToday"></canvas>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" id="answeredToday">0</div>
+                    <div class="kpi-label">Answered Today</div>
+                    <div class="kpi-change positive" id="answeredToday-change">+0</div>
+                </div>
+            </div>
+            <div class="kpi-card" data-trend="stable">
+                <div class="kpi-header">
+                    <div class="kpi-icon">❌</div>
+                    <canvas class="kpi-sparkline" id="sparkline-abandonedToday"></canvas>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" id="abandonedToday">0</div>
+                    <div class="kpi-label">Abandoned Today</div>
+                    <div class="kpi-change negative" id="abandonedToday-change">+0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Service Level and Daily Statistics -->
+        <section class="stats-row">
+            <div class="stat-card">
+                <h3 class="stat-title">Service Level</h3>
+                <div class="stat-content">
+                    <div class="progress-ring">
+                        <svg width="120" height="120">
+                            <circle class="progress-ring-bg" cx="60" cy="60" r="52"></circle>
+                            <circle class="progress-ring-fill" id="serviceLevelRing" cx="60" cy="60" r="52"></circle>
+                        </svg>
+                        <div class="progress-value" id="serviceLevel">0%</div>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-item">
+                            <span class="stat-label">Target:</span>
+                            <span class="stat-value">80%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Within 20s:</span>
+                            <span class="stat-value" id="answeredWithinSLA">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3 class="stat-title">Daily Statistics</h3>
+                <div class="stat-content daily-stats">
+                    <div class="daily-stat-item">
+                        <div class="daily-stat-icon success">✓</div>
+                        <div class="daily-stat-info">
+                            <div class="daily-stat-value" id="totalAnswered">0</div>
+                            <div class="daily-stat-label">Answered</div>
+                        </div>
+                    </div>
+                    <div class="daily-stat-item">
+                        <div class="daily-stat-icon danger">✗</div>
+                        <div class="daily-stat-info">
+                            <div class="daily-stat-value" id="totalAbandoned">0</div>
+                            <div class="daily-stat-label">Abandoned</div>
+                        </div>
+                    </div>
+                    <div class="daily-stat-item">
+                        <div class="daily-stat-icon info">⟲</div>
+                        <div class="daily-stat-info">
+                            <div class="daily-stat-value" id="avgHandlingTime">00:00</div>
+                            <div class="daily-stat-label">Avg Handling</div>
+                        </div>
+                    </div>
+                    <div class="daily-stat-item">
+                        <div class="daily-stat-icon warning">⧗</div>
+                        <div class="daily-stat-info">
+                            <div class="daily-stat-value" id="longestWait">00:00</div>
+                            <div class="daily-stat-label">Longest Wait</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card sentiment-meter-card">
+                <h3 class="stat-title">Sentiment Meter</h3>
+                <div class="stat-content">
+                    <div class="sentiment-meter">
+                        <div class="sentiment-meter-bar">
+                            <div class="sentiment-meter-fill positive" id="sentimentMeterPositive" style="width: 0%"></div>
+                            <div class="sentiment-meter-fill neutral" id="sentimentMeterNeutral" style="width: 0%"></div>
+                            <div class="sentiment-meter-fill negative" id="sentimentMeterNegative" style="width: 0%"></div>
+                        </div>
+                        <div class="sentiment-meter-labels">
+                            <span class="positive">😊 <span id="sentimentPositivePercent">0%</span></span>
+                            <span class="neutral">😐 <span id="sentimentNeutralPercent">0%</span></span>
+                            <span class="negative">😞 <span id="sentimentNegativePercent">0%</span></span>
+                        </div>
+                    </div>
+                    <div class="sentiment-trend">
+                        <canvas id="sentimentTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <div class="main-content-grid">
+            <!-- Agent Status Panel -->
+            <section class="agent-status-panel">
+                <h2 class="section-title">
+                    <span>Agent Status</span>
+                    <span class="agent-summary" id="agentSummary">0/12 Available</span>
+                </h2>
+                <div class="agent-panel-grid" id="agentPanelGrid">
+                    <!-- Agent cards will be dynamically added here -->
+                </div>
+            </section>
+
+            <!-- Recent Call Activity Feed -->
+            <section class="recent-activity-section">
+                <h2 class="section-title">Recent Call Activity</h2>
+                <div class="activity-feed" id="activityFeed">
+                    <!-- Activity items will be added here -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Queue Status with Priority Indicators -->
+        <section class="queue-section">
+            <h2 class="section-title">Queue Status</h2>
+            <div class="queue-grid" id="queueGrid">
+                <!-- Queue cards will be dynamically added here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="wallboard-footer">
+        <div class="footer-content">
+            <span id="connectionStatus" class="connection-status connected">
+                <span class="status-dot"></span>
+                Connected to 3CX
+            </span>
+            <span class="footer-text">Auto-refresh: <span id="refreshInterval">5s</span></span>
+            <span class="footer-text">Last Updated: <span id="lastUpdate">--:--:--</span></span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

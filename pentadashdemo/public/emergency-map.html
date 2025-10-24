@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Incidents Map - Pentanet</title>
+    <link rel="stylesheet" href="/css/wallboard.css">
+    <link rel="stylesheet" href="/css/emergency-map.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+</head>
+<body class="theme-dark">
+    <!-- Top Navigation Bar -->
+    <nav class="emergency-nav">
+        <div class="nav-left">
+            <img src="/assets/pentanet-logo.png" alt="Pentanet" class="logo" onerror="this.style.display='none'">
+            <h1 class="page-title">🚨 Western Australia Emergency Incidents Map</h1>
+        </div>
+        <div class="nav-right">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                <span class="theme-icon">☀️</span>
+            </button>
+            <button class="btn-secondary" onclick="window.close()">Close Map</button>
+        </div>
+    </nav>
+
+    <!-- Map Container -->
+    <div class="map-container">
+        <!-- Side Panel with Controls -->
+        <div class="map-sidebar">
+            <div class="sidebar-section">
+                <h3>🗺️ Layers</h3>
+                <div class="layer-controls" id="layer-controls">
+                    <!-- Layer checkboxes will be added by JavaScript -->
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>📊 Legend</h3>
+                <div class="map-legend" id="map-legend">
+                    <div class="legend-item">
+                        <div class="legend-marker" style="background: #FF3232;"></div>
+                        <span>Bushfires (DFES)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker" style="background: #FF8800;"></div>
+                        <span>Satellite Hotspots (DEA)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker" style="background: #FFD700;"></div>
+                        <span>MyFireWatch</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker" style="background: #3388ff;"></div>
+                        <span>NBN Outages</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-marker" style="background: #6BC143;"></div>
+                        <span>Power Outages</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>📍 Incident Summary</h3>
+                <div class="incident-stats" id="incident-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Total Incidents:</span>
+                        <span class="stat-value" id="total-incidents">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Bushfires:</span>
+                        <span class="stat-value" id="bushfire-count">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Hotspots:</span>
+                        <span class="stat-value" id="hotspot-count">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">NBN Outages:</span>
+                        <span class="stat-value" id="nbn-count">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Power Outages:</span>
+                        <span class="stat-value" id="power-count">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>🔄 Auto Refresh</h3>
+                <div class="refresh-controls">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="auto-refresh" checked>
+                        <span>Enable (every 5 min)</span>
+                    </label>
+                    <button class="btn-refresh" onclick="refreshMapData()">🔄 Refresh Now</button>
+                </div>
+                <div class="last-update">
+                    Last update: <span id="last-update-time">Never</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Map -->
+        <div class="map-main">
+            <div id="full-emergency-map"></div>
+
+            <!-- Map Toolbar -->
+            <div class="map-toolbar">
+                <button class="toolbar-btn" onclick="resetMapView()" title="Reset View">
+                    🏠 Reset View
+                </button>
+                <button class="toolbar-btn" onclick="fitAllIncidents()" title="Zoom to All Incidents">
+                    🎯 Fit All
+                </button>
+                <button class="toolbar-btn" onclick="toggleHeatmap()" title="Toggle Heatmap">
+                    🔥 Heatmap
+                </button>
+                <button class="toolbar-btn" onclick="exportMapData()" title="Export GeoJSON">
+                    💾 Export Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/emergency-map-full.js"></script>
+    <script>
+        // Ensure map initializes after page load
+        if (document.readyState === 'loading') {
+            console.log('Waiting for DOM...');
+        } else {
+            console.log('DOM already loaded');
+        }
+    </script>
+</body>
+</html>

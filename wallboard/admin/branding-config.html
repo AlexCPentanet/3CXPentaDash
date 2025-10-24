@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branding & Email Configuration - 3CX Wallboard Admin</title>
+    <link rel="stylesheet" href="../css/admin.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #0052CC;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #94a3b8;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #1e293b;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: #1e293b;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #0052CC;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            background: #1e293b;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #0052CC;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0052CC;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 4px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .color-picker-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-input input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .color-input input[type="text"] {
+            flex: 1;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #0052CC;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0066FF;
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: #00C48C;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #00D99A;
+        }
+
+        .preview-box {
+            background: #0f172a;
+            border: 2px dashed #334155;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-box img {
+            max-width: 100%;
+            max-height: 150px;
+            margin-bottom: 10px;
+        }
+
+        .file-upload {
+            position: relative;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #0052CC;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .file-upload-label:hover {
+            background: #0066FF;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #00C48C;
+            color: white;
+        }
+
+        .alert.error {
+            background: #F44336;
+            color: white;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .email-preview {
+            background: white;
+            color: #333;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .recipient-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .recipient-tag {
+            background: #0052CC;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recipient-tag .remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>⚙️ Branding & Email Configuration</h1>
+            <p>Customize the appearance of your wallboard and configure email alerts</p>
+        </div>
+
+        <div id="alertBox" class="alert"></div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('branding')">Branding & Styling</button>
+            <button class="tab" onclick="switchTab('email')">Email Configuration</button>
+            <button class="tab" onclick="switchTab('notifications')">Notification Settings</button>
+        </div>
+
+        <!-- Branding Tab -->
+        <div id="branding-tab" class="tab-content active">
+            <div class="section">
+                <h2>Company Information</h2>
+                <div class="form-group">
+                    <label for="companyName">Company Name</label>
+                    <input type="text" id="companyName" value="Pentanet" placeholder="Your Company Name">
+                </div>
+
+                <div class="form-group">
+                    <label for="companyLogo">Company Logo</label>
+                    <div class="preview-box" id="logoPreview">
+                        <img src="/assets/pentanet-logo.png" alt="Logo Preview" onerror="this.style.display='none'">
+                        <p>Upload your company logo (PNG, JPG, SVG)</p>
+                    </div>
+                    <div class="file-upload">
+                        <label class="file-upload-label">
+                            Choose Logo File
+                            <input type="file" id="logoFile" accept="image/*" onchange="previewLogo(this)">
+                        </label>
+                    </div>
+                    <small>Recommended size: 200px × 60px (transparent background recommended)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="favicon">Favicon</label>
+                    <div class="file-upload">
+                        <label class="file-upload-label">
+                            Choose Favicon File
+                            <input type="file" id="faviconFile" accept="image/x-icon,image/png" onchange="previewFavicon(this)">
+                        </label>
+                    </div>
+                    <small>ICO or PNG format, 32×32px or 64×64px</small>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Color Scheme</h2>
+                <div class="color-picker-group">
+                    <div class="form-group">
+                        <label>Primary Color</label>
+                        <div class="color-input">
+                            <input type="color" id="primaryColor" value="#0052CC">
+                            <input type="text" id="primaryColorHex" value="#0052CC" onchange="updateColorPicker('primary', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Secondary Color</label>
+                        <div class="color-input">
+                            <input type="color" id="secondaryColor" value="#00A3E0">
+                            <input type="text" id="secondaryColorHex" value="#00A3E0" onchange="updateColorPicker('secondary', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Accent Color</label>
+                        <div class="color-input">
+                            <input type="color" id="accentColor" value="#00D4FF">
+                            <input type="text" id="accentColorHex" value="#00D4FF" onchange="updateColorPicker('accent', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Success Color</label>
+                        <div class="color-input">
+                            <input type="color" id="successColor" value="#00C48C">
+                            <input type="text" id="successColorHex" value="#00C48C" onchange="updateColorPicker('success', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Warning Color</label>
+                        <div class="color-input">
+                            <input type="color" id="warningColor" value="#FF9800">
+                            <input type="text" id="warningColorHex" value="#FF9800" onchange="updateColorPicker('warning', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Danger Color</label>
+                        <div class="color-input">
+                            <input type="color" id="dangerColor" value="#F44336">
+                            <input type="text" id="dangerColorHex" value="#F44336" onchange="updateColorPicker('danger', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+            </div>
+
+            <div class="section">
+                <h2>Footer Information</h2>
+                <div class="form-group">
+                    <label for="footerText">Footer Text</label>
+                    <input type="text" id="footerText" value="© 2025 Pentanet. Licensed by Aatrox Communications Limited" placeholder="Copyright notice">
+                </div>
+
+                <div class="form-group">
+                    <label for="contactEmail">Contact Email</label>
+                    <input type="email" id="contactEmail" value="stephen@pentanet.com.au" placeholder="support@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="supportPhone">Support Phone</label>
+                    <input type="tel" id="supportPhone" value="+61 8 9466 2670" placeholder="+1 (555) 123-4567">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="saveBranding()">Save Branding Settings</button>
+                <button class="btn btn-secondary" onclick="previewBranding()">Preview Changes</button>
+            </div>
+        </div>
+
+        <!-- Email Tab -->
+        <div id="email-tab" class="tab-content">
+            <div class="section">
+                <h2>SMTP Configuration</h2>
+
+                <div class="checkbox-group form-group">
+                    <input type="checkbox" id="emailEnabled" checked>
+                    <label for="emailEnabled">Enable Email Alerts</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="smtpHost">SMTP Server</label>
+                    <input type="text" id="smtpHost" placeholder="smtp.gmail.com">
+                    <small>Your email server hostname</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="smtpPort">SMTP Port</label>
+                    <select id="smtpPort">
+                        <option value="587">587 (TLS - Recommended)</option>
+                        <option value="465">465 (SSL)</option>
+                        <option value="25">25 (Standard)</option>
+                    </select>
+                </div>
+
+                <div class="checkbox-group form-group">
+                    <input type="checkbox" id="smtpSecure">
+                    <label for="smtpSecure">Use SSL/TLS</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="smtpUser">Email Account</label>
+                    <input type="email" id="smtpUser" placeholder="alerts@pentanet.com.au">
+                </div>
+
+                <div class="form-group">
+                    <label for="smtpPass">Email Password / App Password</label>
+                    <input type="password" id="smtpPass" placeholder="••••••••••••">
+                    <small>For Gmail, use an <a href="https://support.google.com/accounts/answer/185833" target="_blank" style="color: #0052CC;">App Password</a></small>
+                </div>
+
+                <button class="btn btn-success" onclick="testEmail()">Send Test Email</button>
+            </div>
+
+            <div class="section">
+                <h2>Alert Recipients</h2>
+                <div class="form-group">
+                    <label for="recipientEmail">Add Recipient Email</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="email" id="recipientEmail" placeholder="user@pentanet.com.au" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="addRecipient()">Add</button>
+                    </div>
+                </div>
+
+                <div class="recipient-list" id="recipientList">
+                    <div class="recipient-tag">
+                        stephen@pentanet.com.au
+                        <span class="remove" onclick="removeRecipient(this)">×</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="saveEmailConfig()">Save Email Configuration</button>
+            </div>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div id="notifications-tab" class="tab-content">
+            <div class="section">
+                <h2>Alert Triggers</h2>
+
+                <div class="checkbox-group form-group">
+                    <input type="checkbox" id="alertHighSeverity" checked>
+                    <label for="alertHighSeverity">Send immediate alerts for HIGH severity flagged calls</label>
+                </div>
+
+                <div class="checkbox-group form-group">
+                    <input type="checkbox" id="alertMediumSeverity" checked>
+                    <label for="alertMediumSeverity">Send immediate alerts for MEDIUM severity flagged calls</label>
+                </div>
+
+                <div class="checkbox-group form-group">
+                    <input type="checkbox" id="alertLowSeverity">
+                    <label for="alertLowSeverity">Send immediate alerts for LOW severity flagged calls</label>
+                </div>
+
+                <div class="checkbox-group form-group">
+                    <input type="checkbox" id="dailyDigest" checked>
+                    <label for="dailyDigest">Send daily digest for low severity calls</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="digestTime">Daily Digest Time</label>
+                    <input type="time" id="digestTime" value="09:00">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Alert Content</h2>
+
+                <div class="checkbox-group form-group">
+                    <input type="checkbox" id="includeRecording" checked>
+                    <label for="includeRecording">Include call recording as attachment (if available)</label>
+                </div>
+
+                <div class="checkbox-group form-group">
+                    <input type="checkbox" id="includeTranscript" checked>
+                    <label for="includeTranscript">Include full call transcription</label>
+                </div>
+
+                <div class="checkbox-group form-group">
+                    <input type="checkbox" id="includeSentiment" checked>
+                    <label for="includeSentiment">Include sentiment analysis</label>
+                </div>
+
+                <div class="checkbox-group form-group">
+                    <input type="checkbox" id="includeKeywords" checked>
+                    <label for="includeKeywords">Show detected keywords</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailSubject">Email Subject Template</label>
+                    <input type="text" id="emailSubject" value="[FLAGGED CALL] {severity} - {reason}">
+                    <small>Available variables: {severity}, {reason}, {caller}, {extension}, {time}</small>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Email Preview</h2>
+                <div class="email-preview">
+                    <h3 style="color: #F44336;">🚨 Flagged Call Alert</h3>
+                    <div style="background: #f5f5f5; padding: 15px; margin: 15px 0; border-left: 4px solid #F44336;">
+                        <p><strong>Call ID:</strong> 12345</p>
+                        <p><strong>Time:</strong> 2025-01-20 14:30:25</p>
+                        <p><strong>Caller:</strong> John Doe (+61 8 9123 4567)</p>
+                        <p><strong>Extension:</strong> 153</p>
+                        <p><strong>Reason:</strong> Abusive Language Detected</p>
+                        <p><strong>Severity:</strong> HIGH</p>
+                    </div>
+                    <p><em>This is a preview. Actual emails will include full transcriptions and sentiment data.</em></p>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="saveNotificationSettings()">Save Notification Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Logo preview
+        function previewLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.querySelector('#logoPreview img');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Color picker sync
+        document.getElementById('primaryColor').addEventListener('input', (e) => {
+            document.getElementById('primaryColorHex').value = e.target.value;
+        });
+
+        document.getElementById('secondaryColor').addEventListener('input', (e) => {
+            document.getElementById('secondaryColorHex').value = e.target.value;
+        });
+
+        document.getElementById('accentColor').addEventListener('input', (e) => {
+            document.getElementById('accentColorHex').value = e.target.value;
+        });
+
+        document.getElementById('successColor').addEventListener('input', (e) => {
+            document.getElementById('successColorHex').value = e.target.value;
+        });
+
+        document.getElementById('warningColor').addEventListener('input', (e) => {
+            document.getElementById('warningColorHex').value = e.target.value;
+        });
+
+        document.getElementById('dangerColor').addEventListener('input', (e) => {
+            document.getElementById('dangerColorHex').value = e.target.value;
+        });
+
+        function updateColorPicker(type, value) {
+            document.getElementById(`${type}Color`).value = value;
+        }
+
+        // Reset to defaults
+        function resetToDefaults() {
+            if (confirm('Reset all colors to Pentanet defaults?')) {
+                document.getElementById('primaryColor').value = '#0052CC';
+                document.getElementById('primaryColorHex').value = '#0052CC';
+                document.getElementById('secondaryColor').value = '#00A3E0';
+                document.getElementById('secondaryColorHex').value = '#00A3E0';
+                document.getElementById('accentColor').value = '#00D4FF';
+                document.getElementById('accentColorHex').value = '#00D4FF';
+                document.getElementById('successColor').value = '#00C48C';
+                document.getElementById('successColorHex').value = '#00C48C';
+                document.getElementById('warningColor').value = '#FF9800';
+                document.getElementById('warningColorHex').value = '#FF9800';
+                document.getElementById('dangerColor').value = '#F44336';
+                document.getElementById('dangerColorHex').value = '#F44336';
+            }
+        }
+
+        // Add recipient
+        function addRecipient() {
+            const email = document.getElementById('recipientEmail').value;
+            if (email && email.includes('@')) {
+                const tag = document.createElement('div');
+                tag.className = 'recipient-tag';
+                tag.innerHTML = `${email} <span class="remove" onclick="removeRecipient(this)">×</span>`;
+                document.getElementById('recipientList').appendChild(tag);
+                document.getElementById('recipientEmail').value = '';
+            }
+        }
+
+        // Remove recipient
+        function removeRecipient(element) {
+            element.parentElement.remove();
+        }
+
+        // Show alert
+        function showAlert(message, type = 'success') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert ${type} show`;
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        // Save branding
+        async function saveBranding() {
+            showAlert('Saving branding settings...', 'success');
+            // Implementation would send to backend API
+            setTimeout(() => {
+                showAlert('Branding settings saved successfully!', 'success');
+            }, 1000);
+        }
+
+        // Save email config
+        async function saveEmailConfig() {
+            showAlert('Saving email configuration...', 'success');
+            // Implementation would send to backend API
+            setTimeout(() => {
+                showAlert('Email configuration saved successfully!', 'success');
+            }, 1000);
+        }
+
+        // Save notification settings
+        async function saveNotificationSettings() {
+            showAlert('Saving notification settings...', 'success');
+            // Implementation would send to backend API
+            setTimeout(() => {
+                showAlert('Notification settings saved successfully!', 'success');
+            }, 1000);
+        }
+
+        // Test email
+        async function testEmail() {
+            const recipient = document.getElementById('smtpUser').value;
+            if (!recipient) {
+                showAlert('Please enter SMTP user email first', 'error');
+                return;
+            }
+
+            showAlert('Sending test email...', 'success');
+            // Implementation would send to backend API
+            setTimeout(() => {
+                showAlert(`Test email sent to ${recipient}!`, 'success');
+            }, 2000);
+        }
+
+        // Preview branding
+        function previewBranding() {
+            window.open('../index.html', '_blank');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3CX XAPI Authentication Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0f172a;
+            color: #d8d9da;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { color: #5794f2; }
+        .section {
+            background: #181b1f;
+            border: 1px solid #2f3338;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #3274d9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { background: #5794f2; }
+        .success { color: #73bf69; }
+        .error { color: #f2495c; }
+        .info { color: #5794f2; }
+        pre {
+            background: #0b0c0e;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            background: #0b0c0e;
+            border: 1px solid #2f3338;
+            color: #d8d9da;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #9fa2a8;
+        }
+    </style>
+</head>
+<body>
+    <h1>3CX XAPI Authentication Test</h1>
+
+    <div class="section">
+        <h2>Step 1: Configuration</h2>
+        <label>API URL (with port):</label>
+        <input type="text" id="apiUrl" value="https://pentanet.3cx.com.au:5001">
+
+        <label>Client ID:</label>
+        <input type="text" id="clientId" value="client1wb">
+
+        <label>Client Secret:</label>
+        <input type="password" id="clientSecret" value="hAIf3wp46naM8EWcvp9QEosJ54a9YLwr">
+
+        <br><br>
+        <button onclick="testAuth()">Test Authentication</button>
+    </div>
+
+    <div class="section">
+        <h2>Step 2: Token Request</h2>
+        <div id="tokenResult">Click "Test Authentication" to begin...</div>
+    </div>
+
+    <div class="section">
+        <h2>Step 3: Token Validation</h2>
+        <div id="validationResult">Waiting for token...</div>
+    </div>
+
+    <div class="section">
+        <h2>Step 4: Test XAPI Endpoint</h2>
+        <button onclick="testEndpoint()" id="testEndpointBtn" disabled>Test Extensions Endpoint</button>
+        <div id="endpointResult"></div>
+    </div>
+
+    <script>
+        let accessToken = null;
+
+        async function testAuth() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const clientId = document.getElementById('clientId').value;
+            const clientSecret = document.getElementById('clientSecret').value;
+
+            const resultDiv = document.getElementById('tokenResult');
+            resultDiv.innerHTML = '<div class="info">Requesting token...</div>';
+
+            try {
+                const tokenUrl = `${apiUrl}/connect/token`;
+
+                const params = new URLSearchParams();
+                params.append('client_id', clientId);
+                params.append('client_secret', clientSecret);
+                params.append('grant_type', 'client_credentials');
+
+                console.log('Token request URL:', tokenUrl);
+                console.log('Token request body:', params.toString());
+
+                const response = await fetch(tokenUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params.toString()
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+
+                const responseText = await response.text();
+                console.log('Response text:', responseText);
+
+                if (!response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Authentication Failed</div>
+                        <div>Status: ${response.status} ${response.statusText}</div>
+                        <pre>${responseText}</pre>
+                    `;
+                    return;
+                }
+
+                // Parse JSON
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Invalid JSON Response</div>
+                        <pre>${responseText}</pre>
+                    `;
+                    return;
+                }
+
+                console.log('Parsed token data:', data);
+
+                if (data.access_token) {
+                    accessToken = data.access_token;
+                    resultDiv.innerHTML = `
+                        <div class="success">✓ Token Obtained Successfully</div>
+                        <div>Token Type: ${data.token_type || 'Bearer'}</div>
+                        <div>Expires In: ${data.expires_in || '3600'} seconds</div>
+                        <div>Token Preview: ${accessToken.substring(0, 30)}...</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+
+                    // Enable test endpoint button
+                    document.getElementById('testEndpointBtn').disabled = false;
+
+                    // Validate token
+                    validateToken(apiUrl, accessToken);
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ No access_token in response</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Error: ${error.message}</div>
+                    <pre>${error.stack}</pre>
+                `;
+                console.error('Authentication error:', error);
+            }
+        }
+
+        async function validateToken(apiUrl, token) {
+            const resultDiv = document.getElementById('validationResult');
+            resultDiv.innerHTML = '<div class="info">Validating token...</div>';
+
+            try {
+                const validationUrl = `${apiUrl}/xapi/v1/Defs?$select=Id`;
+                console.log('Validation URL:', validationUrl);
+
+                const response = await fetch(validationUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('Validation response status:', response.status);
+                const responseText = await response.text();
+                console.log('Validation response:', responseText);
+
+                if (!response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Validation Failed</div>
+                        <div>Status: ${response.status} ${response.statusText}</div>
+                        <pre>${responseText}</pre>
+                    `;
+                    return;
+                }
+
+                const version = response.headers.get('x-3cx-version') || 'Unknown';
+
+                resultDiv.innerHTML = `
+                    <div class="success">✓ Token Validated Successfully</div>
+                    <div>3CX Version: ${version}</div>
+                    <pre>${responseText}</pre>
+                `;
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Validation Error: ${error.message}</div>
+                    <pre>${error.stack}</pre>
+                `;
+                console.error('Validation error:', error);
+            }
+        }
+
+        async function testEndpoint() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const resultDiv = document.getElementById('endpointResult');
+            resultDiv.innerHTML = '<div class="info">Testing PhoneExtensions endpoint...</div>';
+
+            try {
+                const url = `${apiUrl}/xapi/v1/PhoneExtensions?$top=5&$select=Number,FirstName,LastName,CurrentProfile`;
+                console.log('Endpoint URL:', url);
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('Endpoint response status:', response.status);
+                const responseText = await response.text();
+                console.log('Endpoint response:', responseText);
+
+                if (!response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Endpoint Test Failed</div>
+                        <div>Status: ${response.status} ${response.statusText}</div>
+                        <pre>${responseText}</pre>
+                    `;
+                    return;
+                }
+
+                const data = JSON.parse(responseText);
+                resultDiv.innerHTML = `
+                    <div class="success">✓ Endpoint Working</div>
+                    <div>Extensions Found: ${data.value ? data.value.length : 0}</div>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Endpoint Error: ${error.message}</div>
+                    <pre>${error.stack}</pre>
+                `;
+                console.error('Endpoint error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

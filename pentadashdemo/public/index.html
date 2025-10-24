@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pentanet Call Center Dashboard</title>
+    <link rel="stylesheet" href="css/wallboard.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="theme-dark">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <img src="assets/pentanet-logo.png" alt="Pentanet" class="logo" onerror="this.style.display='none'">
+            <h1 class="dashboard-title">Call Center Dashboard</h1>
+        </div>
+        <div class="nav-right">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                <span class="theme-icon">☀️</span>
+            </button>
+            <button class="btn-login" onclick="showLogin()">Login</button>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-container">
+        <!-- KPI Cards Row -->
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-icon calls-active"></div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Active Calls</div>
+                    <div class="kpi-value" id="kpi-active-calls">0</div>
+                    <div class="kpi-sparkline">
+                        <canvas id="sparkline-active"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon calls-waiting"></div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Calls Waiting</div>
+                    <div class="kpi-value" id="kpi-waiting">0</div>
+                    <div class="kpi-sparkline">
+                        <canvas id="sparkline-waiting"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon agents-available"></div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Available Agents</div>
+                    <div class="kpi-value" id="kpi-agents">0/12</div>
+                    <div class="kpi-trend" id="kpi-agents-trend">—</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon time"></div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Avg Wait Time</div>
+                    <div class="kpi-value" id="kpi-wait-time">0s</div>
+                    <div class="kpi-trend" id="kpi-wait-trend">—</div>
+                </div>
+            </div>
+
+            <div class="kpi-card sentiment-card">
+                <div class="kpi-icon sentiment"></div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Overall Sentiment</div>
+                    <div class="kpi-value" id="kpi-sentiment">—</div>
+                    <div class="sentiment-bar">
+                        <div class="sentiment-fill" id="sentiment-fill" style="width: 50%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Left Column: Queues & Agents -->
+            <div class="left-column">
+                <!-- Queue Status -->
+                <div class="panel queue-panel">
+                    <div class="panel-header">
+                        <h2>Queue Status</h2>
+                        <span class="live-indicator">● LIVE</span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="queue-list" id="queue-list">
+                            <div class="queue-item" data-queue="investor">
+                                <div class="queue-header">
+                                    <span class="queue-name">Investor Line</span>
+                                    <span class="queue-priority high">High Priority</span>
+                                </div>
+                                <div class="queue-stats">
+                                    <div class="queue-stat">
+                                        <span class="stat-label">Waiting</span>
+                                        <span class="stat-value" id="queue-investor-waiting">0</span>
+                                    </div>
+                                    <div class="queue-stat">
+                                        <span class="stat-label">Longest Wait</span>
+                                        <span class="stat-value" id="queue-investor-longest">0s</span>
+                                    </div>
+                                    <div class="queue-stat">
+                                        <span class="stat-label">Agents</span>
+                                        <span class="stat-value" id="queue-investor-agents">0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="queue-item" data-queue="noc">
+                                <div class="queue-header">
+                                    <span class="queue-name">NOC Support</span>
+                                    <span class="queue-priority high">High Priority</span>
+                                </div>
+                                <div class="queue-stats">
+                                    <div class="queue-stat">
+                                        <span class="stat-label">Waiting</span>
+                                        <span class="stat-value" id="queue-noc-waiting">0</span>
+                                    </div>
+                                    <div class="queue-stat">
+                                        <span class="stat-label">Longest Wait</span>
+                                        <span class="stat-value" id="queue-noc-longest">0s</span>
+                                    </div>
+                                    <div class="queue-stat">
+                                        <span class="stat-label">Agents</span>
+                                        <span class="stat-value" id="queue-noc-agents">0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="queue-item" data-queue="delivery">
+                                <div class="queue-header">
+                                    <span class="queue-name">Delivery Receiving</span>
+                                    <span class="queue-priority medium">Medium Priority</span>
+                                </div>
+                                <div class="queue-stats">
+                                    <div class="queue-stat">
+                                        <span class="stat-label">Waiting</span>
+                                        <span class="stat-value" id="queue-delivery-waiting">0</span>
+                                    </div>
+                                    <div class="queue-stat">
+                                        <span class="stat-label">Longest Wait</span>
+                                        <span class="stat-value" id="queue-delivery-longest">0s</span>
+                                    </div>
+                                    <div class="queue-stat">
+                                        <span class="stat-label">Agents</span>
+                                        <span class="stat-value" id="queue-delivery-agents">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent Status -->
+                <div class="panel agent-panel">
+                    <div class="panel-header">
+                        <h2>Agent Status</h2>
+                        <div class="agent-legend">
+                            <span class="legend-item"><span class="dot available"></span>Available</span>
+                            <span class="legend-item"><span class="dot oncall"></span>On Call</span>
+                            <span class="legend-item"><span class="dot away"></span>Away</span>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="agent-grid" id="agent-grid">
+                            <!-- Agents will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Column: Charts & Activity -->
+            <div class="center-column">
+                <!-- Call Volume Chart -->
+                <div class="panel chart-panel">
+                    <div class="panel-header">
+                        <h2>Call Volume (Today)</h2>
+                        <div class="chart-controls">
+                            <select id="chart-timeframe" onchange="updateChartTimeframe(this.value)">
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="7days">Last 7 Days</option>
+                                <option value="30days">Last 30 Days</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <canvas id="call-volume-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Sentiment Trends -->
+                <div class="panel sentiment-panel">
+                    <div class="panel-header">
+                        <h2>Sentiment Trends</h2>
+                    </div>
+                    <div class="panel-content">
+                        <canvas id="sentiment-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="panel activity-panel">
+                    <div class="panel-header">
+                        <h2>Recent Call Activity</h2>
+                    </div>
+                    <div class="panel-content">
+                        <div class="activity-feed" id="activity-feed">
+                            <div class="activity-empty">
+                                <span>No recent activity</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Leaderboard & Alerts -->
+            <div class="right-column">
+                <!-- Positive Agent Leaderboard -->
+                <div class="panel leaderboard-panel">
+                    <div class="panel-header">
+                        <h2>🌟 Top Performers Today</h2>
+                    </div>
+                    <div class="panel-content">
+                        <div class="leaderboard" id="leaderboard">
+                            <div class="leaderboard-empty">
+                                <span>No data yet</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Incidents Map -->
+                <div class="panel map-panel">
+                    <div class="panel-header">
+                        <h2>🚨 Emergency Incidents</h2>
+                        <div class="header-actions">
+                            <div class="map-layer-toggles" id="map-layer-toggles">
+                                <!-- Layer toggles will be added by JavaScript -->
+                            </div>
+                            <button class="btn-open-map" onclick="openEmergencyMap()" title="Open Full Screen Map">
+                                🗺️ Open Map
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div id="emergency-map" class="emergency-map"></div>
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="panel status-panel">
+                    <div class="panel-header">
+                        <h2>System Status</h2>
+                    </div>
+                    <div class="panel-content">
+                        <div class="status-list">
+                            <div class="status-item">
+                                <div class="status-label">
+                                    <span class="status-dot success"></span>
+                                    3CX Connection
+                                </div>
+                                <span class="status-value" id="status-3cx">Connected</span>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-label">
+                                    <span class="status-dot success"></span>
+                                    WebSocket
+                                </div>
+                                <span class="status-value" id="status-ws">Connected</span>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-label">
+                                    <span class="status-dot success"></span>
+                                    Trunk: Virtutel
+                                </div>
+                                <span class="status-value">Active</span>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-label">
+                                    <span class="status-dot success"></span>
+                                    Recordings
+                                </div>
+                                <span class="status-value">SMB Connected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="panel stats-panel">
+                    <div class="panel-header">
+                        <h2>Today's Statistics</h2>
+                    </div>
+                    <div class="panel-content">
+                        <div class="quick-stats">
+                            <div class="quick-stat">
+                                <span class="stat-label">Total Calls</span>
+                                <span class="stat-value" id="stat-total-calls">0</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-label">Answered</span>
+                                <span class="stat-value success" id="stat-answered">0</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-label">Missed</span>
+                                <span class="stat-value danger" id="stat-missed">0</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-label">Avg Duration</span>
+                                <span class="stat-value" id="stat-avg-duration">0m 0s</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Status Bar -->
+    <footer class="status-bar">
+        <div class="status-bar-item">
+            <span class="status-label">System Uptime:</span>
+            <span class="status-value" id="system-uptime">—</span>
+        </div>
+        <div class="status-bar-item">
+            <span class="status-label">Last Update:</span>
+            <span class="status-value" id="last-update">—</span>
+        </div>
+        <div class="status-bar-item">
+            <span class="status-label">Dashboard v1.0.0</span>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manager/Admin Login</h2>
+                <button class="modal-close" onclick="closeLogin()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required autocomplete="current-password">
+                    </div>
+                    <div class="form-error" id="login-error" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/wallboard-app.js"></script>
+</body>
+</html>

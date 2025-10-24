@@ -1,0 +1,245 @@
+================================================================================
+                    PENTADASH DEMO - QUICK REFERENCE CARD
+================================================================================
+
+                         UI QC & REVIEW INSTANCE
+                         Created: October 22, 2025
+
+================================================================================
+                              ACCESS INFORMATION
+================================================================================
+
+DASHBOARD URL:
+  http://localhost:9443/
+
+SERVER STATUS:
+  API Server:  http://localhost:9444
+  WebSocket:   ws://localhost:9444/ws
+  Environment: Development (Simulated Data)
+
+================================================================================
+                              LOGIN CREDENTIALS
+================================================================================
+
+ADMIN ACCOUNTS:
+  Username: admin       Password: Admin123!     (Full system access)
+  Username: qc          Password: QC123!        (QC review account)
+
+MANAGER ACCOUNTS:
+  Username: manager     Password: Manager123!   (Manager dashboard)
+  Username: demo        Password: Demo123!      (Demo purposes)
+
+VIEWER ACCOUNT:
+  Username: viewer      Password: Viewer123!    (Read-only wallboard)
+
+================================================================================
+                              KEY URLS
+================================================================================
+
+Public Wallboard (No login):  http://localhost:9443/
+Manager Dashboard:            http://localhost:9443/manager
+Admin Panel:                  http://localhost:9443/admin
+Infrastructure Map:           http://localhost:9443/map
+
+================================================================================
+                              DEMO DATA INCLUDED
+================================================================================
+
+TOWER LOCATIONS: 8 towers across Perth metro area
+  - Perth CBD, Fremantle, Joondalup, Morley
+  - Rockingham, Midland, Armadale, Scarborough
+
+FLAGGED CALLS: 5 sample calls with sentiment analysis
+  - 2 HIGH severity (TIO, Legal)
+  - 2 MEDIUM severity (Escalation, Churn)
+  - 1 POSITIVE (Customer satisfaction)
+
+INFRASTRUCTURE FEEDS: Live simulated data (updates every 5 min)
+  - NBN Outages (Perth metro)
+  - Western Power Outages
+  - Fire Incidents
+  - Flood Warnings
+
+================================================================================
+                              STARTING THE SERVER
+================================================================================
+
+METHOD 1: Batch File (Recommended)
+  c:\Users\alex.campkin\Documents\Project\pentadashdemo\start-demo.bat
+
+METHOD 2: PowerShell
+  c:\Users\alex.campkin\Documents\Project\pentadashdemo\start-demo.ps1
+
+METHOD 3: Manual
+  cd c:\Users\alex.campkin\Documents\Project\pentadashdemo\server
+  node server.js
+
+STOPPING THE SERVER:
+  Press Ctrl+C in the console window
+
+================================================================================
+                              FEATURES TO TEST
+================================================================================
+
+PUBLIC WALLBOARD:
+  [√] Real-time KPI cards
+  [√] Queue status panel
+  [√] Agent status grid (12 agents)
+  [√] Call volume chart (24-hour)
+  [√] Sentiment trends
+  [√] Activity feed
+  [√] Top performers
+  [√] Dark/Light theme
+
+MANAGER DASHBOARD:
+  [√] Overview tab
+  [√] Call flow diagram
+  [√] Recordings search
+  [√] Flagged calls review
+  [√] Agent analytics
+  [√] PDF report generation
+  [√] TIO monitoring
+
+ADMIN PANEL:
+  [√] User management
+  [√] 3CX API configuration
+  [√] Email/SMTP setup
+  [√] Branding customization
+  [√] Keyword management
+  [√] Tower locations & CSV import
+  [√] Alert configuration
+  [√] Map settings
+  [√] Audit log
+
+INFRASTRUCTURE MAP:
+  [√] 8 tower markers with coverage radius
+  [√] NBN outage layer
+  [√] Power outage layer
+  [√] Fire incident layer
+  [√] Flood warning layer
+  [√] Interactive popups
+  [√] Address lookup
+
+================================================================================
+                              TROUBLESHOOTING
+================================================================================
+
+ISSUE: Server won't start
+FIX:   Check ports 9443/9444 not in use
+       Verify Node.js 20 installed: node --version
+       Install dependencies: cd server && npm install
+
+ISSUE: Can't access dashboard
+FIX:   Ensure server running (check console)
+       Try http://localhost:9443/ (not https)
+       Clear browser cache
+
+ISSUE: Login not working
+FIX:   Check username/password (case-sensitive)
+       Reset demo data: cd server && node init-demo-db.js
+
+ISSUE: Map not loading
+FIX:   Check internet connection (loads tiles from CDN)
+       Ensure user is logged in
+       Check browser console (F12) for errors
+
+ISSUE: No infrastructure data
+FIX:   Wait 5 minutes for first update cycle
+       Data is simulated in demo mode
+       Check server console logs
+
+================================================================================
+                              TECHNICAL DETAILS
+================================================================================
+
+Technology Stack:
+  Backend:    Node.js 20 LTS + Express.js
+  Database:   SQLite 3
+  Frontend:   HTML5 + Vanilla JavaScript + CSS3
+  Charts:     Chart.js 4.4.0
+  Maps:       Leaflet 1.9.4
+  WebSocket:  ws 8.14.2
+
+Database Location:
+  C:\Users\alex.campkin\Documents\Project\pentadashdemo\data\database\dashboard-demo.db
+
+Configuration:
+  .env file:  pentadashdemo\server\.env
+  Ports:      9443 (Web), 9444 (API)
+  Mode:       Development with simulated data
+
+================================================================================
+                              RESETTING DEMO DATA
+================================================================================
+
+To reset the demo database to initial state:
+
+  cd c:\Users\alex.campkin\Documents\Project\pentadashdemo\server
+  node init-demo-db.js
+
+This will recreate:
+  - 5 demo user accounts
+  - 8 tower locations
+  - 5 flagged call samples
+  - Default settings and keywords
+
+================================================================================
+                              DOCUMENTATION FILES
+================================================================================
+
+README_DEMO.md                  - Quick start guide
+DEMO_ACCESS_INSTRUCTIONS.md     - Complete documentation
+QUICK_REFERENCE.txt             - This file
+COMPLETE_SYSTEM_DOCUMENTATION.md - Full technical docs
+
+================================================================================
+                              SUPPORT & FEEDBACK
+================================================================================
+
+For issues or feedback:
+  - Check server console for backend errors
+  - Check browser console (F12) for frontend errors
+  - Review documentation files
+  - Test with different browsers
+  - Verify Node.js and npm versions
+
+QC Review Checklist:
+  [ ] Test all login accounts
+  [ ] Verify UI responsiveness
+  [ ] Check all dashboard tabs
+  [ ] Test map functionality
+  [ ] Verify admin features
+  [ ] Check for console errors
+  [ ] Test dark/light themes
+  [ ] Verify real-time updates
+
+================================================================================
+                         NEXT STEPS AFTER QC
+================================================================================
+
+1. Document any UI/UX issues
+2. Note performance concerns
+3. Report bugs or errors
+4. Suggest improvements
+5. Verify feature completeness
+
+Once approved:
+  - Deploy to production 3CX server
+  - Configure real API credentials
+  - Set up production SMTP
+  - Import actual tower data
+  - Enable live infrastructure APIs
+
+================================================================================
+                              VERSION INFO
+================================================================================
+
+Demo Version:   1.0.0-DEMO
+Created:        October 22, 2025
+Purpose:        UI QC and Review
+Environment:    Local Development
+Host Machine:   alex.campkin workstation
+
+================================================================================
+                              END OF QUICK REFERENCE
+================================================================================

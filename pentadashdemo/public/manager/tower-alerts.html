@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Alerts - Pentanet Dashboard</title>
+    <link rel="stylesheet" href="../css/wallboard.css">
+    <link rel="stylesheet" href="../css/tower-alerts.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body class="theme-dark">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <img src="../assets/pentanet-logo.png" alt="Pentanet" class="logo" onerror="this.style.display='none'">
+            <h1 class="dashboard-title">Tower Alerts</h1>
+        </div>
+        <div class="nav-right">
+            <span class="user-info" id="top-user-info">Loading...</span>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>Pentanet</h2>
+                <p class="sidebar-subtitle">Manager Dashboard</p>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="tower-alerts.html" class="active">Tower Alerts</a></li>
+            </ul>
+            <div class="user-info">
+                <span id="user-info">Loading...</span>
+                <button onclick="logout()" class="logout-btn">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="tower-alerts-container">
+                <div class="alerts-header">
+                    <h1>🗼 Tower Infrastructure Alerts</h1>
+                    <button onclick="refreshAlerts()" class="btn btn-primary">🔄 Refresh</button>
+                </div>
+
+                <!-- Alert Statistics -->
+                <div class="alert-stats">
+                    <div class="alert-stat-card">
+                        <h3>Active Alerts</h3>
+                        <div class="value" id="active-alerts-count">0</div>
+                    </div>
+                    <div class="alert-stat-card">
+                        <h3>Fire Incidents</h3>
+                        <div class="value" id="fire-alerts-count">0</div>
+                    </div>
+                    <div class="alert-stat-card">
+                        <h3>Power Outages</h3>
+                        <div class="value" id="power-alerts-count">0</div>
+                    </div>
+                    <div class="alert-stat-card">
+                        <h3>Affected Customers</h3>
+                        <div class="value" id="affected-customers-count">0</div>
+                    </div>
+                </div>
+
+                <!-- Tower Map -->
+                <div class="map-container">
+                    <div class="map-header">
+                        <h2>📍 Tower & Emergency Incident Map</h2>
+                        <div class="layer-controls" id="layer-controls">
+                            <!-- Layer toggles will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div id="tower-map" class="tower-map"></div>
+                </div>
+
+                <!-- Alerts List -->
+                <div class="alerts-list">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Recent Alerts</h2>
+                        <div class="filter-bar">
+                            <select id="type-filter" onchange="filterAlerts()">
+                                <option value="all">All Types</option>
+                                <option value="fire">Fire Incidents</option>
+                                <option value="power">Power Outages</option>
+                            </select>
+                            <select id="status-filter" onchange="filterAlerts()">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="alerts-container">
+                        <p>Loading alerts...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../js/tower-alerts.js"></script>
+</body>
+</html>

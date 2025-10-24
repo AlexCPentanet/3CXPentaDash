@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3CX API Diagnostic Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0f172a;
+            color: #d8d9da;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #5794f2;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #9fa2a8;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .section {
+            background: #181b1f;
+            border: 1px solid #2f3338;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            color: #5794f2;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .config-label {
+            color: #9fa2a8;
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        .config-value {
+            color: #73bf69;
+            font-weight: bold;
+        }
+
+        button {
+            background: #3274d9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #5794f2;
+        }
+
+        button:disabled {
+            background: #4a4f58;
+            cursor: not-allowed;
+        }
+
+        .test-group {
+            margin-bottom: 30px;
+        }
+
+        .test-group h3 {
+            color: #ff9830;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .endpoint-test {
+            background: #0b0c0e;
+            border: 1px solid #2f3338;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .endpoint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .endpoint-path {
+            font-weight: bold;
+            color: #d8d9da;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #4a4f58;
+            color: #9fa2a8;
+        }
+
+        .status-testing {
+            background: #ff9830;
+            color: #0b0c0e;
+            animation: pulse 1s infinite;
+        }
+
+        .status-success {
+            background: #73bf69;
+            color: #0b0c0e;
+        }
+
+        .status-error {
+            background: #f2495c;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .endpoint-details {
+            font-size: 12px;
+            color: #9fa2a8;
+            margin-top: 10px;
+        }
+
+        .response-preview {
+            background: #000;
+            border: 1px solid #2f3338;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 11px;
+        }
+
+        .success { color: #73bf69; }
+        .error { color: #f2495c; }
+        .warning { color: #ff9830; }
+        .info { color: #5794f2; }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .summary-card {
+            background: #0b0c0e;
+            border: 1px solid #2f3338;
+            border-radius: 4px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .summary-label {
+            color: #9fa2a8;
+            font-size: 12px;
+        }
+
+        .recommendations {
+            background: #1e293b;
+            border-left: 4px solid #ff9830;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .recommendations h4 {
+            color: #ff9830;
+            margin-bottom: 10px;
+        }
+
+        .recommendations ul {
+            margin-left: 20px;
+            color: #d8d9da;
+        }
+
+        .recommendations li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>3CX API Diagnostic Tool</h1>
+        <div class="subtitle">Comprehensive endpoint testing to identify available APIs and authentication issues</div>
+
+        <!-- Configuration Section -->
+        <div class="section">
+            <h2>Configuration</h2>
+            <div class="config-grid">
+                <div class="config-label">API URL:</div>
+                <div class="config-value" id="configApiUrl">-</div>
+
+                <div class="config-label">Client ID:</div>
+                <div class="config-value" id="configClientId">-</div>
+
+                <div class="config-label">Auth Method:</div>
+                <div class="config-value" id="configAuthMethod">-</div>
+
+                <div class="config-label">Token Status:</div>
+                <div class="config-value" id="tokenStatus">Not authenticated</div>
+            </div>
+            <button onclick="diagnostic.authenticate()">Authenticate</button>
+        </div>
+
+        <!-- Test Controls -->
+        <div class="section">
+            <h2>Test Controls</h2>
+            <button onclick="diagnostic.runAllTests()" id="runAllBtn">Run All Tests</button>
+            <button onclick="diagnostic.runXAPITests()" id="runXAPIBtn">Test XAPI Endpoints</button>
+            <button onclick="diagnostic.runLegacyTests()" id="runLegacyBtn">Test Legacy API Endpoints</button>
+            <button onclick="diagnostic.clearResults()">Clear Results</button>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="section">
+            <h2>Test Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-label">Total Tests</div>
+                    <div class="summary-value" id="summaryTotal">0</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Successful</div>
+                    <div class="summary-value success" id="summarySuccess">0</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Failed</div>
+                    <div class="summary-value error" id="summaryFailed">0</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Pending</div>
+                    <div class="summary-value warning" id="summaryPending">0</div>
+                </div>
+            </div>
+            <div id="recommendations"></div>
+        </div>
+
+        <!-- XAPI Tests -->
+        <div class="section">
+            <div class="test-group">
+                <h3>XAPI v1 Endpoints (Configuration API)</h3>
+                <div id="xapiTests"></div>
+            </div>
+        </div>
+
+        <!-- Legacy API Tests -->
+        <div class="section">
+            <div class="test-group">
+                <h3>Legacy REST API Endpoints</h3>
+                <div id="legacyTests"></div>
+            </div>
+        </div>
+
+        <!-- Alternative Endpoints -->
+        <div class="section">
+            <div class="test-group">
+                <h3>Alternative Endpoints</h3>
+                <div id="alternativeTests"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        class APIDiagnostic {
+            constructor() {
+                this.config = window.WALLBOARD_CONFIG || {};
+                this.apiBaseUrl = this.config.apiUrl || '';
+                this.clientId = this.config.clientId || '';
+                this.clientSecret = this.config.clientSecret || '';
+                this.accessToken = null;
+
+                this.endpoints = {
+                    xapi: [
+                        { path: '/xapi/v1/Defs', method: 'GET', description: 'System definitions (validation endpoint)', query: '?$select=Id&$top=1' },
+                        { path: '/xapi/v1/PhoneExtensions', method: 'GET', description: 'Phone extensions list', query: '?$top=5&$select=Number,FirstName,LastName,CurrentProfile' },
+                        { path: '/xapi/v1/Groups', method: 'GET', description: 'Call queues and groups', query: '?$top=5&$select=Number,Name,Type' },
+                        { path: '/xapi/v1/ActiveConnections', method: 'GET', description: 'Currently active calls', query: '?$top=10' },
+                        { path: '/xapi/v1/CallLogRecords', method: 'GET', description: 'Call history records', query: '?$top=5' },
+                        { path: '/xapi/v1/SystemStatus', method: 'GET', description: 'System status information', query: '' },
+                        { path: '/xapi/v1/QueueStatus', method: 'GET', description: 'Real-time queue statistics', query: '' }
+                    ],
+                    legacy: [
+                        { path: '/api/ExtensionList', method: 'GET', description: 'Extensions (legacy API)' },
+                        { path: '/api/QueueList', method: 'GET', description: 'Queue list (legacy API)' },
+                        { path: '/api/ActiveCalls', method: 'GET', description: 'Active calls (legacy API)' },
+                        { path: '/api/CallStatistics', method: 'GET', description: 'Call statistics (legacy API)' },
+                        { path: '/api/SystemStatus', method: 'GET', description: 'System status (legacy API)' }
+                    ],
+                    alternative: [
+                        { path: '/services/v1/extensions', method: 'GET', description: 'Extensions (services API)' },
+                        { path: '/services/v1/queues', method: 'GET', description: 'Queues (services API)' },
+                        { path: '/management/extensions', method: 'GET', description: 'Extensions (management API)' },
+                        { path: '/webapi/extensions', method: 'GET', description: 'Extensions (webapi)' },
+                        { path: '/rest/v1/extensions', method: 'GET', description: 'Extensions (REST v1)' }
+                    ]
+                };
+
+                this.results = {
+                    xapi: {},
+                    legacy: {},
+                    alternative: {}
+                };
+
+                this.init();
+            }
+
+            init() {
+                // Display configuration
+                document.getElementById('configApiUrl').textContent = this.apiBaseUrl;
+                document.getElementById('configClientId').textContent = this.clientId;
+                document.getElementById('configAuthMethod').textContent = this.config.authMethod || 'Unknown';
+
+                // Create test UI elements
+                this.createTestElements();
+            }
+
+            createTestElements() {
+                // XAPI tests
+                const xapiContainer = document.getElementById('xapiTests');
+                this.endpoints.xapi.forEach((endpoint, index) => {
+                    xapiContainer.innerHTML += this.createEndpointTestHTML(`xapi-${index}`, endpoint);
+                });
+
+                // Legacy tests
+                const legacyContainer = document.getElementById('legacyTests');
+                this.endpoints.legacy.forEach((endpoint, index) => {
+                    legacyContainer.innerHTML += this.createEndpointTestHTML(`legacy-${index}`, endpoint);
+                });
+
+                // Alternative tests
+                const altContainer = document.getElementById('alternativeTests');
+                this.endpoints.alternative.forEach((endpoint, index) => {
+                    altContainer.innerHTML += this.createEndpointTestHTML(`alt-${index}`, endpoint);
+                });
+            }
+
+            createEndpointTestHTML(id, endpoint) {
+                const fullPath = endpoint.path + (endpoint.query || '');
+                return `
+                    <div class="endpoint-test" id="test-${id}">
+                        <div class="endpoint-header">
+                            <div>
+                                <div class="endpoint-path">${endpoint.method} ${endpoint.path}</div>
+                                <div class="endpoint-details">${endpoint.description}</div>
+                            </div>
+                            <span class="status-badge status-pending" id="status-${id}">PENDING</span>
+                        </div>
+                        <div class="response-preview" id="response-${id}" style="display: none;"></div>
+                    </div>
+                `;
+            }
+
+            async authenticate() {
+                console.log('Authenticating with 3CX XAPI...');
+                document.getElementById('tokenStatus').textContent = 'Authenticating...';
+                document.getElementById('tokenStatus').className = 'config-value warning';
+
+                try {
+                    const tokenUrl = `${this.apiBaseUrl}/connect/token`;
+                    const params = new URLSearchParams();
+                    params.append('client_id', this.clientId);
+                    params.append('client_secret', this.clientSecret);
+                    params.append('grant_type', 'client_credentials');
+
+                    const response = await fetch(tokenUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params.toString()
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Authentication failed: ${response.status} ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    this.accessToken = data.access_token;
+
+                    document.getElementById('tokenStatus').textContent = `Authenticated (expires in ${data.expires_in}s)`;
+                    document.getElementById('tokenStatus').className = 'config-value success';
+
+                    console.log('✓ Authentication successful');
+                    return true;
+
+                } catch (error) {
+                    document.getElementById('tokenStatus').textContent = `Failed: ${error.message}`;
+                    document.getElementById('tokenStatus').className = 'config-value error';
+                    console.error('✗ Authentication failed:', error);
+                    return false;
+                }
+            }
+
+            async testEndpoint(id, endpoint) {
+                const statusEl = document.getElementById(`status-${id}`);
+                const responseEl = document.getElementById(`response-${id}`);
+
+                // Update status
+                statusEl.textContent = 'TESTING';
+                statusEl.className = 'status-badge status-testing';
+                responseEl.style.display = 'none';
+
+                try {
+                    const url = `${this.apiBaseUrl}${endpoint.path}${endpoint.query || ''}`;
+                    console.log(`Testing: ${endpoint.method} ${url}`);
+
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+
+                    if (this.accessToken) {
+                        headers['Authorization'] = `Bearer ${this.accessToken}`;
+                    }
+
+                    const response = await fetch(url, {
+                        method: endpoint.method,
+                        headers: headers
+                    });
+
+                    const responseText = await response.text();
+                    let responseData;
+                    try {
+                        responseData = JSON.parse(responseText);
+                    } catch {
+                        responseData = responseText;
+                    }
+
+                    // Store result
+                    const result = {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: Object.fromEntries(response.headers.entries()),
+                        data: responseData,
+                        success: response.ok
+                    };
+
+                    // Update UI
+                    if (response.ok) {
+                        statusEl.textContent = `${response.status} OK`;
+                        statusEl.className = 'status-badge status-success';
+
+                        responseEl.innerHTML = `
+                            <div class="success">✓ Success - Status ${response.status}</div>
+                            <div style="margin-top: 10px; color: #9fa2a8;">Response:</div>
+                            <pre>${JSON.stringify(responseData, null, 2)}</pre>
+                        `;
+                    } else {
+                        statusEl.textContent = `${response.status} ERROR`;
+                        statusEl.className = 'status-badge status-error';
+
+                        responseEl.innerHTML = `
+                            <div class="error">✗ Failed - Status ${response.status} ${response.statusText}</div>
+                            <div style="margin-top: 10px; color: #9fa2a8;">Response:</div>
+                            <pre>${typeof responseData === 'object' ? JSON.stringify(responseData, null, 2) : responseData}</pre>
+                        `;
+                    }
+
+                    responseEl.style.display = 'block';
+                    return result;
+
+                } catch (error) {
+                    statusEl.textContent = 'ERROR';
+                    statusEl.className = 'status-badge status-error';
+
+                    responseEl.innerHTML = `
+                        <div class="error">✗ Error: ${error.message}</div>
+                        <pre>${error.stack}</pre>
+                    `;
+                    responseEl.style.display = 'block';
+
+                    return { success: false, error: error.message };
+                }
+            }
+
+            async runXAPITests() {
+                if (!this.accessToken) {
+                    const authenticated = await this.authenticate();
+                    if (!authenticated) {
+                        alert('Authentication failed. Cannot proceed with XAPI tests.');
+                        return;
+                    }
+                }
+
+                for (let i = 0; i < this.endpoints.xapi.length; i++) {
+                    this.results.xapi[i] = await this.testEndpoint(`xapi-${i}`, this.endpoints.xapi[i]);
+                    await this.sleep(500); // Small delay between tests
+                }
+
+                this.updateSummary();
+                this.generateRecommendations();
+            }
+
+            async runLegacyTests() {
+                if (!this.accessToken) {
+                    const authenticated = await this.authenticate();
+                    if (!authenticated) {
+                        alert('Authentication failed. Cannot proceed with tests.');
+                        return;
+                    }
+                }
+
+                for (let i = 0; i < this.endpoints.legacy.length; i++) {
+                    this.results.legacy[i] = await this.testEndpoint(`legacy-${i}`, this.endpoints.legacy[i]);
+                    await this.sleep(500);
+                }
+
+                this.updateSummary();
+                this.generateRecommendations();
+            }
+
+            async runAlternativeTests() {
+                if (!this.accessToken) {
+                    const authenticated = await this.authenticate();
+                    if (!authenticated) {
+                        alert('Authentication failed. Cannot proceed with tests.');
+                        return;
+                    }
+                }
+
+                for (let i = 0; i < this.endpoints.alternative.length; i++) {
+                    this.results.alternative[i] = await this.testEndpoint(`alt-${i}`, this.endpoints.alternative[i]);
+                    await this.sleep(500);
+                }
+
+                this.updateSummary();
+                this.generateRecommendations();
+            }
+
+            async runAllTests() {
+                await this.runXAPITests();
+                await this.runLegacyTests();
+                await this.runAlternativeTests();
+            }
+
+            updateSummary() {
+                let total = 0, success = 0, failed = 0;
+
+                Object.values(this.results).forEach(category => {
+                    Object.values(category).forEach(result => {
+                        total++;
+                        if (result.success) success++;
+                        else failed++;
+                    });
+                });
+
+                document.getElementById('summaryTotal').textContent = total;
+                document.getElementById('summarySuccess').textContent = success;
+                document.getElementById('summaryFailed').textContent = failed;
+                document.getElementById('summaryPending').textContent =
+                    (this.endpoints.xapi.length + this.endpoints.legacy.length + this.endpoints.alternative.length) - total;
+            }
+
+            generateRecommendations() {
+                const recommendations = [];
+
+                // Analyze XAPI results
+                const xapiSuccess = Object.values(this.results.xapi).filter(r => r.success).length;
+                const xapiTotal = Object.keys(this.results.xapi).length;
+
+                if (xapiTotal > 0 && xapiSuccess === 0) {
+                    recommendations.push('XAPI endpoints are not available. This may indicate:');
+                    recommendations.push('- 3CX Configuration API is not enabled');
+                    recommendations.push('- Your license does not include XAPI (requires 8SC+ Enterprise)');
+                    recommendations.push('- Service Principal lacks necessary permissions');
+                } else if (xapiSuccess > 0 && xapiSuccess < xapiTotal) {
+                    recommendations.push(`Some XAPI endpoints work (${xapiSuccess}/${xapiTotal}). Review Service Principal permissions.`);
+                }
+
+                // Check for 401 errors
+                const has401 = Object.values(this.results.xapi).some(r => r.status === 401);
+                if (has401) {
+                    recommendations.push('401 Unauthorized errors detected. Check Service Principal role (should be System Admin or System Owner).');
+                }
+
+                // Check for 404 errors
+                const has404 = Object.values(this.results.xapi).some(r => r.status === 404);
+                if (has404) {
+                    recommendations.push('404 Not Found errors indicate endpoints may not exist in your 3CX version.');
+                }
+
+                // Analyze legacy results
+                const legacySuccess = Object.values(this.results.legacy).filter(r => r.success).length;
+                if (legacySuccess > 0) {
+                    recommendations.push(`Legacy API endpoints are working (${legacySuccess} successful). Consider using these instead of XAPI.`);
+                }
+
+                // Display recommendations
+                const recDiv = document.getElementById('recommendations');
+                if (recommendations.length > 0) {
+                    recDiv.innerHTML = `
+                        <div class="recommendations">
+                            <h4>Recommendations</h4>
+                            <ul>
+                                ${recommendations.map(r => `<li>${r}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    recDiv.innerHTML = '';
+                }
+            }
+
+            clearResults() {
+                this.results = { xapi: {}, legacy: {}, alternative: {} };
+
+                // Reset all status badges
+                document.querySelectorAll('.status-badge').forEach(el => {
+                    el.textContent = 'PENDING';
+                    el.className = 'status-badge status-pending';
+                });
+
+                // Hide all responses
+                document.querySelectorAll('.response-preview').forEach(el => {
+                    el.style.display = 'none';
+                });
+
+                // Clear summary
+                this.updateSummary();
+                document.getElementById('recommendations').innerHTML = '';
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Initialize diagnostic tool
+        let diagnostic;
+        window.addEventListener('DOMContentLoaded', () => {
+            diagnostic = new APIDiagnostic();
+        });
+    </script>
+</body>
+</html>

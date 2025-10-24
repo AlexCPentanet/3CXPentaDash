@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard - Pentanet</title>
+    <link rel="stylesheet" href="../css/wallboard.css">
+    <link rel="stylesheet" href="../css/manager.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="theme-dark">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <img src="../assets/pentanet-logo.png" alt="Pentanet" class="logo" onerror="this.style.display='none'">
+            <h1 class="dashboard-title">Manager Dashboard</h1>
+        </div>
+        <div class="nav-right">
+            <span class="user-info" id="user-info">Loading...</span>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                <span class="theme-icon">☀️</span>
+            </button>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Sidebar Navigation -->
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="#overview" class="nav-item active" onclick="showTab('overview')">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Overview</span>
+                </a>
+                <a href="#call-flow" class="nav-item" onclick="showTab('call-flow')">
+                    <span class="nav-icon">🔄</span>
+                    <span class="nav-label">Call Flow</span>
+                </a>
+                <a href="#recordings" class="nav-item" onclick="showTab('recordings')">
+                    <span class="nav-icon">🎙️</span>
+                    <span class="nav-label">Recordings</span>
+                </a>
+                <a href="#flagged" class="nav-item" onclick="showTab('flagged')">
+                    <span class="nav-icon">🚩</span>
+                    <span class="nav-label">Flagged Calls</span>
+                    <span class="badge" id="flagged-badge">0</span>
+                </a>
+                <a href="#agents" class="nav-item" onclick="showTab('agents')">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-label">Agent Analytics</span>
+                </a>
+                <a href="#reports" class="nav-item" onclick="showTab('reports')">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-label">Reports</span>
+                </a>
+                <a href="#tio" class="nav-item" onclick="showTab('tio')">
+                    <span class="nav-icon">⚠️</span>
+                    <span class="nav-label">TIO Monitoring</span>
+                </a>
+                <a href="tower-alerts.html" class="nav-item">
+                    <span class="nav-icon">🗼</span>
+                    <span class="nav-label">Tower Alerts</span>
+                </a>
+                <a href="/" class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">Public Dashboard</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Tab -->
+            <div class="tab-content active" id="tab-overview">
+                <div class="content-header">
+                    <h2>Performance Overview</h2>
+                    <div class="date-filter">
+                        <select id="overview-timeframe" onchange="updateOverviewTimeframe(this.value)">
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="7days">Last 7 Days</option>
+                            <option value="30days">Last 30 Days</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Performance KPIs -->
+                <div class="kpi-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon calls"></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Total Calls</div>
+                            <div class="stat-value" id="stat-total">0</div>
+                            <div class="stat-change positive">+12% vs yesterday</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon answered"></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Answer Rate</div>
+                            <div class="stat-value" id="stat-answer-rate">0%</div>
+                            <div class="stat-change positive">+3% vs yesterday</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon duration"></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Avg Duration</div>
+                            <div class="stat-value" id="stat-avg-duration">0m</div>
+                            <div class="stat-change">Same as yesterday</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon sentiment"></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Avg Sentiment</div>
+                            <div class="stat-value" id="stat-sentiment">0%</div>
+                            <div class="stat-change positive">+5% vs yesterday</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="charts-row">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Call Volume by Hour</h3>
+                        </div>
+                        <canvas id="manager-call-volume-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Department Performance</h3>
+                        </div>
+                        <canvas id="department-performance-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Agent Performance Table -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Agent Performance Today</h3>
+                        <button class="btn-icon" onclick="refreshAgentPerformance()">🔄</button>
+                    </div>
+                    <div class="panel-content">
+                        <table class="data-table" id="agent-performance-table">
+                            <thead>
+                                <tr>
+                                    <th>Agent</th>
+                                    <th>Calls</th>
+                                    <th>Avg Duration</th>
+                                    <th>Sentiment</th>
+                                    <th>Confidence Score</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="loading-row">
+                                    <td colspan="6">Loading data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call Flow Tab -->
+            <div class="tab-content" id="tab-call-flow">
+                <div class="content-header">
+                    <h2>Interactive Call Flow Diagram</h2>
+                    <div class="flow-controls">
+                        <button class="btn-secondary" onclick="resetCallFlowZoom()">Reset View</button>
+                        <button class="btn-secondary" onclick="exportCallFlowPDF()">Export PDF</button>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-live-calls" checked onchange="toggleLiveCalls()">
+                            <span class="toggle-slider"></span>
+                            Show Live Calls
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Call Flow Canvas -->
+                <div class="call-flow-container" id="call-flow-container">
+                    <svg id="call-flow-svg" width="100%" height="800">
+                        <!-- Call flow will be rendered here -->
+                    </svg>
+                </div>
+
+                <!-- Flow Legend -->
+                <div class="flow-legend">
+                    <div class="legend-item">
+                        <div class="legend-icon trunk"></div>
+                        <span>Trunk/DID</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon ivr"></div>
+                        <span>IVR/Menu</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon queue"></div>
+                        <span>Queue</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon agent"></div>
+                        <span>Agent/Extension</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon voicemail"></div>
+                        <span>Voicemail</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color active"></div>
+                        <span>Active Call</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color high-drop"></div>
+                        <span>High Drop Rate (&gt;20%)</span>
+                    </div>
+                </div>
+
+                <!-- Call Flow Stats -->
+                <div class="flow-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Active Calls</div>
+                        <div class="stat-value" id="flow-active-calls">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Calls in Queue</div>
+                        <div class="stat-value" id="flow-queued">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Dropped Today</div>
+                        <div class="stat-value danger" id="flow-dropped">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Drop Rate</div>
+                        <div class="stat-value" id="flow-drop-rate">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recordings Tab -->
+            <div class="tab-content" id="tab-recordings">
+                <div class="content-header">
+                    <h2>Call Recordings</h2>
+                    <button class="btn-primary" onclick="exportRecordingsCSV()">Export CSV</button>
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-panel">
+                    <div class="filter-group">
+                        <label>Date Range</label>
+                        <input type="date" id="rec-start-date">
+                        <span>to</span>
+                        <input type="date" id="rec-end-date">
+                    </div>
+                    <div class="filter-group">
+                        <label>Extension</label>
+                        <input type="text" id="rec-extension" placeholder="e.g., 100">
+                    </div>
+                    <div class="filter-group">
+                        <label>Caller Number</label>
+                        <input type="text" id="rec-caller" placeholder="Search...">
+                    </div>
+                    <div class="filter-group">
+                        <label>Department</label>
+                        <select id="rec-department">
+                            <option value="">All Departments</option>
+                            <option value="investor">Investor Line</option>
+                            <option value="noc">NOC Support</option>
+                            <option value="delivery">Delivery</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="applyRecordingFilters()">Apply Filters</button>
+                    <button class="btn-secondary" onclick="clearRecordingFilters()">Clear</button>
+                </div>
+
+                <!-- Recordings Table -->
+                <div class="panel">
+                    <div class="panel-content">
+                        <table class="data-table" id="recordings-table">
+                            <thead>
+                                <tr>
+                                    <th>Date/Time</th>
+                                    <th>Caller</th>
+                                    <th>Extension</th>
+                                    <th>Duration</th>
+                                    <th>Department</th>
+                                    <th>Sentiment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="loading-row">
+                                    <td colspan="7">Loading recordings...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flagged Calls Tab -->
+            <div class="tab-content" id="tab-flagged">
+                <div class="content-header">
+                    <h2>Flagged Calls</h2>
+                    <div class="btn-group">
+                        <button class="btn-secondary" onclick="exportFlaggedCSV()">Export CSV</button>
+                        <button class="btn-primary" onclick="exportFlaggedPDF()">Generate Report</button>
+                    </div>
+                </div>
+
+                <!-- Flagged Stats -->
+                <div class="flagged-stats">
+                    <div class="stat-card danger">
+                        <div class="stat-label">High Severity</div>
+                        <div class="stat-value" id="flagged-high">0</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-label">Medium Severity</div>
+                        <div class="stat-value" id="flagged-medium">0</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-label">Low Severity</div>
+                        <div class="stat-value" id="flagged-low">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Reviewed</div>
+                        <div class="stat-value" id="flagged-reviewed">0</div>
+                    </div>
+                </div>
+
+                <!-- Severity Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Flagged Calls Trend</h3>
+                    </div>
+                    <canvas id="flagged-trend-chart"></canvas>
+                </div>
+
+                <!-- Flagged Calls Table -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Flagged Call Details</h3>
+                        <div class="filter-group inline">
+                            <select id="flagged-filter" onchange="filterFlaggedCalls(this.value)">
+                                <option value="all">All</option>
+                                <option value="high">High Severity</option>
+                                <option value="medium">Medium Severity</option>
+                                <option value="low">Low Severity</option>
+                                <option value="unreviewed">Unreviewed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <table class="data-table" id="flagged-table">
+                            <thead>
+                                <tr>
+                                    <th>Date/Time</th>
+                                    <th>Caller</th>
+                                    <th>Extension</th>
+                                    <th>Reason</th>
+                                    <th>Severity</th>
+                                    <th>Keywords</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="loading-row">
+                                    <td colspan="8">Loading flagged calls...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIO Monitoring Tab -->
+            <div class="tab-content" id="tab-tio">
+                <div class="content-header">
+                    <h2>TIO Monitoring</h2>
+                    <button class="btn-primary" onclick="generateTIOReport()">Generate TIO Report</button>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>TIO (Telecommunications Industry Ombudsman)</strong><br>
+                    This page tracks all calls mentioning "TIO" or "Telecommunications Industry Ombudsman" which require immediate attention and mandatory reporting.
+                </div>
+
+                <!-- TIO Stats -->
+                <div class="kpi-grid">
+                    <div class="stat-card danger">
+                        <div class="stat-content">
+                            <div class="stat-label">TIO Mentions This Month</div>
+                            <div class="stat-value" id="tio-count">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-label">Under Review</div>
+                            <div class="stat-value" id="tio-review">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-label">Completed</div>
+                            <div class="stat-value success" id="tio-completed">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIO Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>TIO Mentions Over Time</h3>
+                        <select id="tio-timeframe" onchange="updateTIOChart(this.value)">
+                            <option value="30">Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                            <option value="365">Last Year</option>
+                        </select>
+                    </div>
+                    <canvas id="tio-chart"></canvas>
+                </div>
+
+                <!-- TIO Table -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>TIO Call Records</h3>
+                    </div>
+                    <div class="panel-content">
+                        <table class="data-table" id="tio-table">
+                            <thead>
+                                <tr>
+                                    <th>Date/Time</th>
+                                    <th>Caller Details</th>
+                                    <th>Extension</th>
+                                    <th>Transcript Excerpt</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="empty-row">
+                                    <td colspan="6">No TIO mentions found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Analytics Tab -->
+            <div class="tab-content" id="tab-agents">
+                <div class="content-header">
+                    <h2>Agent Analytics & Coaching</h2>
+                </div>
+
+                <!-- Agent Selection -->
+                <div class="agent-selector">
+                    <label>Select Agent:</label>
+                    <select id="agent-select" onchange="loadAgentDetails(this.value)">
+                        <option value="">All Agents</option>
+                    </select>
+                </div>
+
+                <!-- Agent Details Panel -->
+                <div class="agent-details" id="agent-details" style="display: none;">
+                    <!-- Will be populated dynamically -->
+                </div>
+
+                <!-- All Agents Grid -->
+                <div class="agents-grid" id="agents-grid">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div class="tab-content" id="tab-reports">
+                <div class="content-header">
+                    <h2>Report Generation</h2>
+                </div>
+
+                <div class="report-builder">
+                    <div class="report-option">
+                        <h3>Weekly Performance Report</h3>
+                        <p>Comprehensive weekly analytics including call volumes, sentiment analysis, and agent performance.</p>
+                        <button class="btn-primary" onclick="generateWeeklyReport()">Generate Weekly Report</button>
+                    </div>
+
+                    <div class="report-option">
+                        <h3>Custom Date Range Report</h3>
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="date" id="report-start-date">
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="date" id="report-end-date">
+                        </div>
+                        <div class="form-group">
+                            <label>Report Type</label>
+                            <select id="report-type">
+                                <option value="performance">Performance Summary</option>
+                                <option value="flagged">Flagged Calls</option>
+                                <option value="department">Department Analysis</option>
+                                <option value="agent">Agent Performance</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" onclick="generateCustomReport()">Generate Report</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals will be added here -->
+
+    <script src="../js/wallboard-app.js"></script>
+    <script src="../js/manager-app.js"></script>
+    <script src="../js/call-flow.js"></script>
+</body>
+</html>

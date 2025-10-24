@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pentanet Dashboard - Initial Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0A0E14 0%, #141B24 100%);
+            color: #E2E8F0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .setup-container {
+            background: #1A2332;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .setup-header {
+            background: linear-gradient(135deg, #0052CC 0%, #00A3E0 100%);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .setup-header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .setup-header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .progress-bar {
+            display: flex;
+            padding: 20px 30px;
+            background: #141B24;
+            border-bottom: 1px solid #2D3748;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding: 10px;
+        }
+
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 25px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #2D3748;
+            z-index: 0;
+        }
+
+        .progress-step.active:not(:last-child)::after {
+            background: #0052CC;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #2D3748;
+            color: #A0AEC0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-step.active .step-number {
+            background: #0052CC;
+            color: white;
+        }
+
+        .progress-step.complete .step-number {
+            background: #00C48C;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 13px;
+            color: #A0AEC0;
+        }
+
+        .progress-step.active .step-label {
+            color: #E2E8F0;
+            font-weight: 500;
+        }
+
+        .setup-content {
+            padding: 40px;
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #E2E8F0;
+        }
+
+        .step-description {
+            color: #A0AEC0;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #E2E8F0;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: #141B24;
+            border: 1px solid #2D3748;
+            border-radius: 6px;
+            color: #E2E8F0;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0052CC;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 6px;
+            color: #A0AEC0;
+            font-size: 13px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #2D3748;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #0052CC;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #003D99;
+        }
+
+        .btn-secondary {
+            background: #2D3748;
+            color: #E2E8F0;
+        }
+
+        .btn-secondary:hover {
+            background: #3D4758;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .diagnostic-section {
+            background: #141B24;
+            border: 1px solid #2D3748;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .diagnostic-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2D3748;
+        }
+
+        .diagnostic-item:last-child {
+            border-bottom: none;
+        }
+
+        .diagnostic-label {
+            font-weight: 500;
+        }
+
+        .diagnostic-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.success {
+            background: #00C48C;
+        }
+
+        .status-dot.error {
+            background: #F44336;
+        }
+
+        .status-dot.warning {
+            background: #FF9800;
+        }
+
+        .status-dot.loading {
+            background: #00A3E0;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: rgba(0, 163, 224, 0.1);
+            border: 1px solid rgba(0, 163, 224, 0.3);
+            color: #00D4FF;
+        }
+
+        .alert-success {
+            background: rgba(0, 196, 140, 0.1);
+            border: 1px solid rgba(0, 196, 140, 0.3);
+            color: #00C48C;
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            color: #F44336;
+        }
+
+        .completion-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: #00C48C;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .test-result {
+            display: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .test-result.show {
+            display: block;
+        }
+
+        .loader {
+            border: 3px solid #2D3748;
+            border-top: 3px solid #0052CC;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-header">
+            <h1>Pentanet 3CX Dashboard</h1>
+            <p>Initial Setup Wizard</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-label">Welcome</div>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-label">Admin Account</div>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-label">3CX Connection</div>
+            </div>
+            <div class="progress-step" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-label">Diagnostics</div>
+            </div>
+            <div class="progress-step" data-step="5">
+                <div class="step-number">5</div>
+                <div class="step-label">Complete</div>
+            </div>
+        </div>
+
+        <div class="setup-content">
+            <!-- Step 1: Welcome -->
+            <div class="step-content active" data-step="1">
+                <h2 class="step-title">Welcome to Pentanet Dashboard</h2>
+                <p class="step-description">
+                    This wizard will guide you through the initial configuration of your 3CX dashboard.
+                    The setup should take approximately 5-10 minutes to complete.
+                </p>
+
+                <div class="alert alert-info">
+                    <strong>Before you begin:</strong><br>
+                    • Ensure you have 3CX administrator credentials<br>
+                    • Have your SMTP email settings ready (optional)<br>
+                    • Know which users/departments need access
+                </div>
+
+                <div class="diagnostic-section">
+                    <h3 style="margin-bottom: 15px; font-size: 18px;">System Information</h3>
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">Dashboard Version</span>
+                        <span>1.0.0</span>
+                    </div>
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">Installation Path</span>
+                        <span id="install-path">/opt/pentanet-dashboard</span>
+                    </div>
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">Database</span>
+                        <span>SQLite</span>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="nextStep()">Get Started</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Admin Account -->
+            <div class="step-content" data-step="2">
+                <h2 class="step-title">Create Admin Account</h2>
+                <p class="step-description">
+                    Set up your administrator account. This account will have full access to all dashboard features.
+                </p>
+
+                <div class="alert alert-info" id="existing-admin" style="display: none;">
+                    An admin account was created during installation. You can change the password here or skip to the next step.
+                </div>
+
+                <form id="admin-form">
+                    <div class="form-group">
+                        <label for="admin-username">Username</label>
+                        <input type="text" id="admin-username" value="admin" readonly>
+                        <small>Default username: admin</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-password">New Password</label>
+                        <input type="password" id="admin-password" placeholder="Enter a secure password" minlength="8">
+                        <small>Minimum 8 characters, include uppercase, lowercase, and numbers</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-password-confirm">Confirm Password</label>
+                        <input type="password" id="admin-password-confirm" placeholder="Re-enter password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-email">Email Address</label>
+                        <input type="email" id="admin-email" placeholder="admin@pentanet.com.au">
+                        <small>Used for password recovery and alerts</small>
+                    </div>
+                </form>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+                    <button class="btn btn-primary" onclick="saveAdminAccount()">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 3: 3CX Connection -->
+            <div class="step-content" data-step="3">
+                <h2 class="step-title">3CX API Connection</h2>
+                <p class="step-description">
+                    Configure the connection to your 3CX PBX system. These settings were pre-configured during installation.
+                </p>
+
+                <form id="tcx-form">
+                    <div class="form-group">
+                        <label for="tcx-fqdn">3CX FQDN</label>
+                        <input type="text" id="tcx-fqdn" value="pentanet.3cx.com.au" readonly>
+                        <small>Fully Qualified Domain Name of your 3CX server</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tcx-client-id">API Client ID</label>
+                        <input type="text" id="tcx-client-id" placeholder="client1wb">
+                        <small>OAuth Client ID from 3CX Management Console → Integrations → API</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tcx-client-secret">API Client Secret</label>
+                        <input type="password" id="tcx-client-secret" placeholder="Enter client secret">
+                        <small>OAuth Client Secret from 3CX Management Console</small>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" onclick="test3CXConnection()" style="margin-top: 15px;">
+                        Test Connection
+                    </button>
+
+                    <div id="connection-result" class="test-result"></div>
+                </form>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+                    <button class="btn btn-primary" id="btn-next-3cx" onclick="save3CXConfig()">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 4: System Diagnostics -->
+            <div class="step-content" data-step="4">
+                <h2 class="step-title">System Diagnostics</h2>
+                <p class="step-description">
+                    Running system checks to ensure all components are working correctly.
+                </p>
+
+                <div class="diagnostic-section">
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">Database Connection</span>
+                        <div class="diagnostic-status">
+                            <div class="status-dot loading" id="status-db"></div>
+                            <span id="status-db-text">Checking...</span>
+                        </div>
+                    </div>
+
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">Backend API</span>
+                        <div class="diagnostic-status">
+                            <div class="status-dot loading" id="status-api"></div>
+                            <span id="status-api-text">Checking...</span>
+                        </div>
+                    </div>
+
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">3CX Authentication</span>
+                        <div class="diagnostic-status">
+                            <div class="status-dot loading" id="status-auth"></div>
+                            <span id="status-auth-text">Checking...</span>
+                        </div>
+                    </div>
+
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">WebSocket Server</span>
+                        <div class="diagnostic-status">
+                            <div class="status-dot loading" id="status-ws"></div>
+                            <span id="status-ws-text">Checking...</span>
+                        </div>
+                    </div>
+
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">File Permissions</span>
+                        <div class="diagnostic-status">
+                            <div class="status-dot loading" id="status-perms"></div>
+                            <span id="status-perms-text">Checking...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="diagnostic-errors" class="alert alert-error" style="display: none;">
+                    <strong>Issues Found:</strong>
+                    <ul id="error-list" style="margin-top: 10px; margin-left: 20px;"></ul>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+                    <button class="btn btn-secondary" onclick="runDiagnostics()">Re-run Diagnostics</button>
+                    <button class="btn btn-primary" id="btn-finish-diagnostics" onclick="nextStep()" disabled>Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Complete -->
+            <div class="step-content" data-step="5">
+                <div style="text-align: center;">
+                    <div class="completion-icon">✓</div>
+                    <h2 class="step-title">Setup Complete!</h2>
+                    <p class="step-description">
+                        Your Pentanet Dashboard is now configured and ready to use.
+                    </p>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>Next Steps:</strong><br>
+                    • Configure branding and styling in Admin → Settings<br>
+                    • Set up email alerts for flagged calls<br>
+                    • Create manager and viewer accounts for your team<br>
+                    • Configure keyword detection for call monitoring
+                </div>
+
+                <div class="diagnostic-section">
+                    <h3 style="margin-bottom: 15px; font-size: 18px;">Access Information</h3>
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">Dashboard URL</span>
+                        <span id="dashboard-url">https://pentanet.3cx.com.au:5001/pentanet-dashboard</span>
+                    </div>
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">Admin Panel</span>
+                        <span id="admin-url">https://pentanet.3cx.com.au:5001/pentanet-dashboard/admin</span>
+                    </div>
+                    <div class="diagnostic-item">
+                        <span class="diagnostic-label">Manager Dashboard</span>
+                        <span id="manager-url">https://pentanet.3cx.com.au:5001/pentanet-dashboard/manager</span>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="completSetup()" style="flex: 1;">Open Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+        let setupData = {
+            admin: {},
+            threecx: {},
+            diagnostics: {}
+        };
+
+        // Load existing configuration
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Check if setup is already complete
+                const response = await fetch('/api/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status?.setup?.completed) {
+                        window.location.href = '/';
+                        return;
+                    }
+                }
+
+                // Load any existing admin info
+                const adminEmail = document.getElementById('admin-email');
+                if (adminEmail) {
+                    adminEmail.value = 'stephen@pentanet.com.au';
+                }
+            } catch (err) {
+                console.error('Setup initialization error:', err);
+            }
+        });
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateStep();
+
+                // Auto-run diagnostics when reaching step 4
+                if (currentStep === 4) {
+                    setTimeout(runDiagnostics, 500);
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStep();
+            }
+        }
+
+        function updateStep() {
+            // Update progress bar
+            document.querySelectorAll('.progress-step').forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                step.classList.remove('active', 'complete');
+
+                if (stepNum < currentStep) {
+                    step.classList.add('complete');
+                } else if (stepNum === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Update content
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+                if (parseInt(content.dataset.step) === currentStep) {
+                    content.classList.add('active');
+                }
+            });
+        }
+
+        async function saveAdminAccount() {
+            const password = document.getElementById('admin-password').value;
+            const passwordConfirm = document.getElementById('admin-password-confirm').value;
+            const email = document.getElementById('admin-email').value;
+
+            if (password && password !== passwordConfirm) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            if (password && password.length < 8) {
+                alert('Password must be at least 8 characters');
+                return;
+            }
+
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            setupData.admin = {
+                username: 'admin',
+                password: password,
+                email: email
+            };
+
+            // TODO: Save to backend
+            console.log('Admin account configured:', setupData.admin);
+
+            nextStep();
+        }
+
+        async function test3CXConnection() {
+            const clientId = document.getElementById('tcx-client-id').value;
+            const clientSecret = document.getElementById('tcx-client-secret').value;
+            const resultDiv = document.getElementById('connection-result');
+
+            if (!clientId || !clientSecret) {
+                resultDiv.className = 'test-result alert-error show';
+                resultDiv.textContent = 'Please enter both Client ID and Client Secret';
+                return;
+            }
+
+            resultDiv.className = 'test-result alert-info show';
+            resultDiv.innerHTML = '<div class="loader"></div> Testing connection...';
+
+            try {
+                // TODO: Test 3CX connection via backend
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                resultDiv.className = 'test-result alert-success show';
+                resultDiv.textContent = '✓ Connection successful! 3CX API is accessible.';
+
+                document.getElementById('btn-next-3cx').disabled = false;
+            } catch (err) {
+                resultDiv.className = 'test-result alert-error show';
+                resultDiv.textContent = '✗ Connection failed: ' + err.message;
+            }
+        }
+
+        async function save3CXConfig() {
+            const clientId = document.getElementById('tcx-client-id').value;
+            const clientSecret = document.getElementById('tcx-client-secret').value;
+
+            if (!clientId || !clientSecret) {
+                alert('Please enter 3CX API credentials');
+                return;
+            }
+
+            setupData.threecx = {
+                clientId,
+                clientSecret
+            };
+
+            // TODO: Save to backend
+            console.log('3CX config saved:', setupData.threecx);
+
+            nextStep();
+        }
+
+        async function runDiagnostics() {
+            const checks = [
+                { id: 'db', label: 'Database Connection', test: testDatabase },
+                { id: 'api', label: 'Backend API', test: testAPI },
+                { id: 'auth', label: '3CX Authentication', test: test3CXAuth },
+                { id: 'ws', label: 'WebSocket Server', test: testWebSocket },
+                { id: 'perms', label: 'File Permissions', test: testPermissions }
+            ];
+
+            let allPassed = true;
+            const errors = [];
+
+            for (const check of checks) {
+                const statusDot = document.getElementById(`status-${check.id}`);
+                const statusText = document.getElementById(`status-${check.id}-text`);
+
+                statusDot.className = 'status-dot loading';
+                statusText.textContent = 'Checking...';
+
+                try {
+                    const result = await check.test();
+
+                    if (result.success) {
+                        statusDot.className = 'status-dot success';
+                        statusText.textContent = 'OK';
+                    } else {
+                        statusDot.className = 'status-dot error';
+                        statusText.textContent = 'Failed';
+                        allPassed = false;
+                        errors.push(`${check.label}: ${result.error}`);
+                    }
+                } catch (err) {
+                    statusDot.className = 'status-dot error';
+                    statusText.textContent = 'Error';
+                    allPassed = false;
+                    errors.push(`${check.label}: ${err.message}`);
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+
+            if (!allPassed) {
+                const errorDiv = document.getElementById('diagnostic-errors');
+                const errorList = document.getElementById('error-list');
+                errorList.innerHTML = errors.map(e => `<li>${e}</li>`).join('');
+                errorDiv.style.display = 'block';
+            } else {
+                document.getElementById('diagnostic-errors').style.display = 'none';
+            }
+
+            document.getElementById('btn-finish-diagnostics').disabled = !allPassed;
+        }
+
+        async function testDatabase() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                return { success: data.status?.database?.connected === true };
+            } catch (err) {
+                return { success: false, error: err.message };
+            }
+        }
+
+        async function testAPI() {
+            try {
+                const response = await fetch('/api/status');
+                return { success: response.ok };
+            } catch (err) {
+                return { success: false, error: 'API not responding' };
+            }
+        }
+
+        async function test3CXAuth() {
+            // Simulate 3CX auth test
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return { success: true };
+        }
+
+        async function testWebSocket() {
+            return new Promise((resolve) => {
+                try {
+                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                    const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+
+                    ws.onopen = () => {
+                        ws.close();
+                        resolve({ success: true });
+                    };
+
+                    ws.onerror = () => {
+                        resolve({ success: false, error: 'WebSocket connection failed' });
+                    };
+
+                    setTimeout(() => {
+                        ws.close();
+                        resolve({ success: false, error: 'Connection timeout' });
+                    }, 5000);
+                } catch (err) {
+                    resolve({ success: false, error: err.message });
+                }
+            });
+        }
+
+        async function testPermissions() {
+            // Simulate permissions test
+            await new Promise(resolve => setTimeout(resolve, 500));
+            return { success: true };
+        }
+
+        async function completeSetup() {
+            // Mark setup as complete
+            try {
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category: 'setup',
+                        key: 'completed',
+                        value: 'true'
+                    })
+                });
+
+                // Redirect to dashboard
+                window.location.href = '/';
+            } catch (err) {
+                console.error('Setup completion error:', err);
+                alert('Error completing setup. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

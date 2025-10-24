@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infrastructure Map - Pentanet</title>
+    <link rel="stylesheet" href="../css/wallboard.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Top Control Bar */
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+            background: var(--bg-panel);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .control-divider {
+            width: 1px;
+            height: 30px;
+            background: var(--border-color);
+        }
+
+        .layer-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .layer-toggle:hover {
+            background: var(--bg-hover);
+        }
+
+        .layer-toggle.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .layer-toggle input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .layer-toggle label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Address Lookup */
+        .address-lookup {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            z-index: 1000;
+            width: 300px;
+            background: var(--bg-panel);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+        }
+
+        .address-lookup input {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .address-lookup input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .lookup-results {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .lookup-result {
+            padding: 10px;
+            background: var(--bg-surface);
+            border-radius: 4px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .lookup-result:hover {
+            background: var(--bg-hover);
+        }
+
+        /* Legend */
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-panel);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            max-width: 250px;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-icon.tower {
+            background: #0052CC;
+        }
+
+        .legend-icon.nbn {
+            background: #FF9800;
+        }
+
+        .legend-icon.power {
+            background: #F44336;
+        }
+
+        .legend-icon.fire {
+            background: #E91E63;
+        }
+
+        .legend-icon.flood {
+            background: #2196F3;
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            position: absolute;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: var(--color-danger);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(244, 67, 54, 0.4);
+            display: none;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        .alert-banner.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .alert-banner .close {
+            margin-left: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--bg-panel);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            min-width: 300px;
+        }
+
+        .stat-item {
+            padding: 10px;
+            background: var(--bg-surface);
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-value.danger {
+            color: var(--color-danger);
+        }
+
+        /* Custom Leaflet Popup */
+        .leaflet-popup-content-wrapper {
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .leaflet-popup-content {
+            margin: 15px;
+            max-width: 300px;
+        }
+
+        .popup-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .popup-detail {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .popup-severity {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        .popup-severity.critical {
+            background: rgba(244, 67, 54, 0.2);
+            color: var(--color-danger);
+        }
+
+        .popup-severity.high {
+            background: rgba(255, 152, 0, 0.2);
+            color: var(--color-warning);
+        }
+
+        .popup-severity.medium {
+            background: rgba(0, 163, 224, 0.2);
+            color: var(--color-secondary);
+        }
+
+        /* Back Button */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            padding: 10px 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+    </style>
+</head>
+<body class="theme-dark">
+    <div class="map-container">
+        <!-- Back Button -->
+        <a href="/" class="back-button">
+            <span>←</span>
+            <span>Back to Dashboard</span>
+        </a>
+
+        <!-- Map Controls -->
+        <div class="map-controls">
+            <div class="control-group">
+                <div class="layer-toggle active" onclick="toggleLayer('towers')">
+                    <input type="checkbox" id="layer-towers" checked>
+                    <label for="layer-towers">📡 Towers</label>
+                </div>
+                <div class="layer-toggle active" onclick="toggleLayer('nbn')">
+                    <input type="checkbox" id="layer-nbn" checked>
+                    <label for="layer-nbn">🌐 NBN Outages</label>
+                </div>
+                <div class="layer-toggle active" onclick="toggleLayer('power')">
+                    <input type="checkbox" id="layer-power" checked>
+                    <label for="layer-power">⚡ Power Outages</label>
+                </div>
+                <div class="layer-toggle active" onclick="toggleLayer('fire')">
+                    <input type="checkbox" id="layer-fire" checked>
+                    <label for="layer-fire">🔥 Fire Incidents</label>
+                </div>
+                <div class="layer-toggle active" onclick="toggleLayer('flood')">
+                    <input type="checkbox" id="layer-flood" checked>
+                    <label for="layer-flood">💧 Flood Warnings</label>
+                </div>
+            </div>
+            <div class="control-divider"></div>
+            <button class="btn-secondary" onclick="refreshMap()">Refresh Data</button>
+        </div>
+
+        <!-- Alert Banner -->
+        <div class="alert-banner" id="alert-banner">
+            <span id="alert-text"></span>
+            <span class="close" onclick="closeAlert()">×</span>
+        </div>
+
+        <!-- Address Lookup -->
+        <div class="address-lookup">
+            <input
+                type="text"
+                id="address-search"
+                placeholder="Search address in Perth..."
+                onkeyup="searchAddress(this.value)"
+            >
+            <div class="lookup-results" id="lookup-results"></div>
+        </div>
+
+        <!-- Map -->
+        <div id="map"></div>
+
+        <!-- Legend -->
+        <div class="map-legend">
+            <div class="legend-title">Map Legend</div>
+            <div class="legend-item">
+                <div class="legend-icon tower"></div>
+                <span>Pentanet Towers</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon nbn"></div>
+                <span>NBN Outages</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon power"></div>
+                <span>Power Outages</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon fire"></div>
+                <span>Fire Incidents</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon flood"></div>
+                <span>Flood Warnings</span>
+            </div>
+        </div>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <div class="stat-item">
+                <div class="stat-label">Towers</div>
+                <div class="stat-value" id="stat-towers">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">NBN Outages</div>
+                <div class="stat-value danger" id="stat-nbn">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Power Outages</div>
+                <div class="stat-value danger" id="stat-power">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Active Incidents</div>
+                <div class="stat-value danger" id="stat-incidents">0</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../js/infrastructure-map.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "name": "3cx-wallboard-admin-server",
+  "version": "2.0.0",
+  "description": "Admin backend server for 3CX wallboard with user management, flagged calls, and reporting",
+  "main": "admin-api.js",
+  "scripts": {
+    "start": "node admin-api.js",
+    "dev": "nodemon admin-api.js",
+    "test": "jest",
+    "migrate": "node scripts/migrate.js"
+  },
+  "keywords": ["3cx", "wallboard", "admin", "api"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.6",
+    "pdfkit": "^0.13.0",
+    "moment": "^2.29.4",
+    "nodemailer": "^6.9.7",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.7.0"
+  }
+}

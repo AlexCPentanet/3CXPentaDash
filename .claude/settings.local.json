@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(taskkill //F //PID 24404)",
+      "Bash(start-demo.bat)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(cmd /c \"cd /d c:\\Users\\alex.campkin\\Documents\\Project\\pentadashdemo && start-demo.bat\")",
+      "Bash(node server.js:*)",
+      "Bash(timeout /t 15 /nobreak)",
+      "Bash(copy:*)",
+      "Bash(cmd /c \"copy c:\\Users\\alex.campkin\\Documents\\Project\\pentadashdemo\\server\\demo-data-generator.js c:\\Users\\alex.campkin\\Documents\\Project\\pentanetdashboard\\server\\demo-data-generator.js\")",
+      "Bash(cmd /c:*)",
+      "Bash(dir:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(sshpass -p \"London22\" ssh -o StrictHostKeyChecking=no root@46.250.243.123 \"echo ''SSH connection successful'' && lsb_release -a\")",
+      "Bash(timeout /t 3 /nobreak)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,11 @@
+tower_name,services,latitude,longitude,address,alert_radius_km
+Perth CBD Tower,"Fiber,5G,Fixed Wireless",-31.9505,115.8605,"123 St Georges Terrace, Perth WA 6000",5
+Fremantle Tower,"Fixed Wireless,4G,5G",-32.0569,115.7439,"45 Market Street, Fremantle WA 6160",8
+Joondalup Tower,"Fiber,Fixed Wireless,5G",-31.7448,115.7661,"10 Joondalup Drive, Joondalup WA 6027",10
+Midland Tower,"Fixed Wireless,5G",-31.8908,116.0135,"78 Great Eastern Hwy, Midland WA 6056",7
+Rockingham Tower,"Fiber,Fixed Wireless",-32.2772,115.7297,"25 Council Ave, Rockingham WA 6168",6
+Mandurah Tower,"Fixed Wireless,5G",-32.5269,115.7217,"88 Pinjarra Road, Mandurah WA 6210",12
+Armadale Tower,"Fixed Wireless,4G",-32.1500,116.0131,"15 Jull Street, Armadale WA 6112",8
+Ellenbrook Tower,"Fiber,Fixed Wireless,5G",-31.7833,115.9667,"Main Street, Ellenbrook WA 6069",9
+Wanneroo Tower,"Fixed Wireless,5G",-31.7475,115.8039,"23 Rocca Way, Wanneroo WA 6065",7
+Baldivis Tower,"Fixed Wireless,4G,5G",-32.3289,115.8274,"50 Safety Bay Road, Baldivis WA 6171",8
