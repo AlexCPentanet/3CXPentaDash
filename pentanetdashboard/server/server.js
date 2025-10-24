@@ -29,6 +29,9 @@ const EmailService = require('./email-service');
 const ReportGenerator = require('./report-generator');
 const DemoDataGenerator = require('./demo-data-generator');
 const EmergencyOverlays = require('./emergency-overlays');
+const PerthSuburbs = require('./perth-suburbs');
+const StatusMonitor = require('./status-monitor');
+const DemoModeProtection = require('./demo-mode-protection');
 
 // Configuration
 const PORT = process.env.PORT || 8444;
@@ -66,6 +69,11 @@ app.use(cors({
 }));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+
+// Apply demo mode protection middleware
+if (demoProtection.enabled) {
+    app.use(demoProtection.protectFileWrites());
+}
 
 // Request logging
 app.use((req, res, next) => {
@@ -109,12 +117,51 @@ const reportGenerator = new ReportGenerator(db, {
     }
 });
 
+// Initialize demo mode protection
+const demoProtection = new DemoModeProtection({
+    enabled: process.env.DEMO_MODE === 'true',
+    readOnlyPaths: [
+        'data/database/dashboard-demo.db',
+        '.env',
+        'server.js'
+    ],
+    protectedSettings: [
+        'tcx_api_credentials',
+        'smtp_config',
+        'jwt_secret'
+    ],
+    logFile: path.join(__dirname, '../data/demo-protection.log')
+});
+
+if (demoProtection.enabled) {
+    console.log('🔒 Demo Mode Protection ENABLED');
+    console.log('   - File writes: PROTECTED');
+    console.log('   - Settings: READ-ONLY');
+    console.log('   - Database: LIMITED WRITES');
+}
+
 // Initialize demo data generator (for demo mode)
 let demoDataGenerator = null;
 if (process.env.DEMO_MODE === 'true' || NODE_ENV === 'development') {
     demoDataGenerator = new DemoDataGenerator();
     console.log('📊 Demo mode enabled - live call data will be simulated');
 }
+
+// Initialize status monitor
+const statusMonitor = new StatusMonitor({
+    tcxFqdn: TCX_CONFIG.fqdn,
+    tcxPort: TCX_CONFIG.port,
+    tcxVersion: TCX_CONFIG.version,
+    smtpHost: process.env.SMTP_HOST,
+    smtpPort: process.env.SMTP_PORT,
+    smtpUser: process.env.SMTP_USER,
+    checkInterval: 60000 // Check every minute
+});
+
+// Start monitoring after a short delay
+setTimeout(() => {
+    statusMonitor.start();
+}, 5000); // 5 second delay to allow server to fully initialize
 
 // =====================================================
 // AUTHENTICATION MIDDLEWARE
@@ -856,6 +903,155 @@ app.get('/api/emergency-overlays', async (req, res) => {
 // Get emergency overlay layer metadata
 app.get('/api/emergency-overlays/meta', (req, res) => {
     res.json(EmergencyOverlays.LAYER_META);
+});
+
+// ==============================================
+// SYSTEM STATUS & MONITORING
+// ===================================================
+
+// Get comprehensive system status
+app.get('/api/admin/status', verifyToken, requireRole('admin'), async (req, res) => {
+    try {
+        const status = statusMonitor.getStatus();
+
+        // Add additional system info
+        const systemInfo = {
+            ...status,
+            systemInfo: {
+                nodeVersion: process.version,
+                platform: process.platform,
+                uptime: process.uptime(),
+                env: NODE_ENV,
+                demoMode: process.env.DEMO_MODE === 'true',
+                ports: {
+                    api: PORT,
+                    web: WEB_PORT
+                }
+            }
+        };
+
+        res.json(systemInfo);
+    } catch (error) {
+        console.error('Error fetching system status:', error);
+        res.status(500).json({ error: 'Failed to fetch system status' });
+    }
+});
+
+// Force refresh all status checks
+app.post('/api/admin/status/refresh', verifyToken, requireRole('admin'), async (req, res) => {
+    try {
+        await statusMonitor.checkAllServices();
+        const status = statusMonitor.getStatus();
+        res.json(status);
+    } catch (error) {
+        console.error('Error refreshing status:', error);
+        res.status(500).json({ error: 'Failed to refresh status' });
+    }
+});
+
+// Get specific service status
+app.get('/api/admin/status/:service', verifyToken, requireRole('admin'), (req, res) => {
+    try {
+        const service = statusMonitor.getService(req.params.service);
+
+        if (!service) {
+            return res.status(404).json({ error: 'Service not found' });
+        }
+
+        res.json(service);
+    } catch (error) {
+        console.error('Error fetching service status:', error);
+        res.status(500).json({ error: 'Failed to fetch service status' });
+    }
+});
+
+// Health check endpoint (public)
+app.get('/api/health', (req, res) => {
+    const status = statusMonitor.getStatus();
+
+    res.status(status.overall === 'operational' ? 200 : 503).json({
+        status: status.overall,
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
+// Get demo protection status
+app.get('/api/admin/demo-protection', verifyToken, requireRole('admin'), (req, res) => {
+    try {
+        const status = demoProtection.getStatus();
+        const recentEvents = demoProtection.getRecentEvents(20);
+
+        res.json({
+            ...status,
+            recentEvents
+        });
+    } catch (error) {
+        console.error('Error fetching demo protection status:', error);
+        res.status(500).json({ error: 'Failed to fetch demo protection status' });
+    }
+});
+
+// Get Perth suburbs GeoJSON
+app.get('/api/perth-suburbs', (req, res) => {
+    try {
+        const suburbs = PerthSuburbs.getAllSuburbsGeoJSON();
+        res.json(suburbs);
+    } catch (error) {
+        console.error('Error fetching Perth suburbs:', error);
+        res.status(500).json({ error: 'Failed to fetch Perth suburbs' });
+    }
+});
+
+// Search suburbs by name
+app.get('/api/perth-suburbs/search', (req, res) => {
+    try {
+        const query = req.query.q || '';
+        const results = PerthSuburbs.searchSuburbs(query);
+        res.json(results);
+    } catch (error) {
+        console.error('Error searching suburbs:', error);
+        res.status(500).json({ error: 'Failed to search suburbs' });
+    }
+});
+
+// Get suburbs within radius
+app.get('/api/perth-suburbs/nearby', (req, res) => {
+    try {
+        const lat = parseFloat(req.query.lat);
+        const lon = parseFloat(req.query.lon);
+        const radius = parseFloat(req.query.radius) || 5;
+
+        if (isNaN(lat) || isNaN(lon)) {
+            return res.status(400).json({ error: 'Invalid coordinates' });
+        }
+
+        const suburbs = PerthSuburbs.getSuburbsWithinRadius(lat, lon, radius);
+        res.json(suburbs);
+    } catch (error) {
+        console.error('Error finding nearby suburbs:', error);
+        res.status(500).json({ error: 'Failed to find nearby suburbs' });
+    }
+});
+
+// Geocode address to coordinates
+app.get('/api/geocode', (req, res) => {
+    try {
+        const suburb = req.query.suburb;
+        if (!suburb) {
+            return res.status(400).json({ error: 'Suburb name required' });
+        }
+
+        const center = PerthSuburbs.getSuburbCenter(suburb);
+        if (!center) {
+            return res.status(404).json({ error: 'Suburb not found' });
+        }
+
+        res.json(center);
+    } catch (error) {
+        console.error('Error geocoding:', error);
+        res.status(500).json({ error: 'Failed to geocode address' });
+    }
 });
 
 // =====================================================

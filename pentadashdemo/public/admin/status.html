@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Status - Admin Panel</title>
+    <link rel="stylesheet" href="../css/wallboard.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <style>
+        .status-page {
+            padding: 20px;
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .overall-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.operational {
+            background: #10B981;
+            box-shadow: 0 0 10px #10B981;
+        }
+
+        .status-indicator.degraded {
+            background: #F59E0B;
+            box-shadow: 0 0 10px #F59E0B;
+        }
+
+        .status-indicator.error {
+            background: #EF4444;
+            box-shadow: 0 0 10px #EF4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .service-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .service-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .service-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .service-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .service-status.operational {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .service-status.degraded,
+        .service-status.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+
+        .service-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+
+        .service-status.unknown,
+        .service-status.not_configured {
+            background: rgba(156, 163, 175, 0.1);
+            color: #9CA3AF;
+        }
+
+        .service-details {
+            margin-top: 10px;
+        }
+
+        .service-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .service-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .service-detail-label {
+            color: var(--text-secondary);
+        }
+
+        .service-detail-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .service-message {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--bg-surface);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .system-info-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .refresh-btn {
+            padding: 10px 20px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .troubleshoot-section {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .troubleshoot-section h3 {
+            margin-top: 0;
+        }
+
+        .troubleshoot-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+    </style>
+</head>
+<body class="theme-dark">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <img src="../assets/pentanet-logo.png" alt="Pentanet" class="logo" onerror="this.style.display='none'">
+            <h1 class="dashboard-title">System Status Monitor</h1>
+        </div>
+        <div class="nav-right">
+            <span class="user-info" id="user-info">Loading...</span>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                <span class="theme-icon">☀️</span>
+            </button>
+            <a href="/admin" class="btn-secondary" style="text-decoration: none; margin-right: 10px;">Back to Admin</a>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="status-page">
+        <div class="status-header">
+            <div class="overall-status">
+                <div class="status-indicator" id="overall-indicator"></div>
+                <div>
+                    <h2 style="margin: 0;">System Status: <span id="overall-status-text">Checking...</span></h2>
+                    <p style="margin: 5px 0 0; color: var(--text-secondary);" id="last-check">Last checked: Never</p>
+                </div>
+            </div>
+            <button class="refresh-btn" onclick="refreshStatus()" id="refresh-btn">
+                🔄 Refresh Now
+            </button>
+        </div>
+
+        <!-- System Info Panel -->
+        <div class="system-info-panel">
+            <h3 style="margin-top: 0;">System Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Uptime</div>
+                    <div class="info-value" id="uptime">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Node Version</div>
+                    <div class="info-value" id="node-version">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Environment</div>
+                    <div class="info-value" id="environment">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Demo Mode</div>
+                    <div class="info-value" id="demo-mode">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">API Port</div>
+                    <div class="info-value" id="api-port">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Web Port</div>
+                    <div class="info-value" id="web-port">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Status Grid -->
+        <h3>Service Status</h3>
+        <div class="status-grid" id="services-grid">
+            <div class="loading">Loading service status...</div>
+        </div>
+
+        <!-- Troubleshooting Section -->
+        <div class="troubleshoot-section">
+            <h3>🔧 Troubleshooting Tools</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">Quick diagnostic and recovery actions</p>
+            <div class="troubleshoot-actions">
+                <button class="action-btn" onclick="testEmergencyWA()">Test Emergency WA Feed</button>
+                <button class="action-btn" onclick="testDEAHotspots()">Test DEA Hotspots</button>
+                <button class="action-btn" onclick="test3CXConnection()">Test 3CX Connection</button>
+                <button class="action-btn" onclick="clearCache()">Clear Application Cache</button>
+                <button class="action-btn" onclick="viewLogs()">View Server Logs</button>
+                <button class="action-btn" onclick="exportStatus()">Export Status Report</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let statusData = null;
+        let autoRefreshInterval = null;
+
+        // Auto-refresh every 30 seconds
+        function startAutoRefresh() {
+            autoRefreshInterval = setInterval(() => {
+                loadStatus();
+            }, 30000);
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
+        async function loadStatus() {
+            try {
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    window.location.href = '/admin';
+                    return;
+                }
+
+                const response = await fetch('/api/admin/status', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    window.location.href = '/admin';
+                    return;
+                }
+
+                statusData = await response.json();
+                displayStatus(statusData);
+            } catch (error) {
+                console.error('Error loading status:', error);
+                document.getElementById('services-grid').innerHTML = '<div class="loading" style="color: #EF4444;">Error loading status: ' + error.message + '</div>';
+            }
+        }
+
+        function displayStatus(data) {
+            // Overall status
+            const indicator = document.getElementById('overall-indicator');
+            const statusText = document.getElementById('overall-status-text');
+            const lastCheck = document.getElementById('last-check');
+
+            indicator.className = 'status-indicator ' + data.overall;
+            statusText.textContent = data.overall.charAt(0).toUpperCase() + data.overall.slice(1);
+            lastCheck.textContent = 'Last checked: ' + new Date(data.lastCheck).toLocaleTimeString();
+
+            // System info
+            if (data.systemInfo) {
+                document.getElementById('uptime').textContent = formatUptime(data.systemInfo.uptime);
+                document.getElementById('node-version').textContent = data.systemInfo.nodeVersion;
+                document.getElementById('environment').textContent = data.systemInfo.env;
+                document.getElementById('demo-mode').textContent = data.systemInfo.demoMode ? 'Enabled' : 'Disabled';
+                document.getElementById('api-port').textContent = data.systemInfo.ports.api;
+                document.getElementById('web-port').textContent = data.systemInfo.ports.web;
+            }
+
+            // Services grid
+            const grid = document.getElementById('services-grid');
+            grid.innerHTML = '';
+
+            Object.entries(data.services).forEach(([key, service]) => {
+                const card = createServiceCard(service);
+                grid.appendChild(card);
+            });
+        }
+
+        function createServiceCard(service) {
+            const card = document.createElement('div');
+            card.className = 'service-card';
+
+            card.innerHTML = `
+                <div class="service-header">
+                    <div class="service-name">${service.name}</div>
+                    <div class="service-status ${service.status}">${service.status.replace('_', ' ')}</div>
+                </div>
+                <div class="service-details">
+                    <div class="service-detail-row">
+                        <span class="service-detail-label">Type</span>
+                        <span class="service-detail-value">${service.type}</span>
+                    </div>
+                    ${service.responseTime !== null ? `
+                    <div class="service-detail-row">
+                        <span class="service-detail-label">Response Time</span>
+                        <span class="service-detail-value">${service.responseTime}ms</span>
+                    </div>
+                    ` : ''}
+                    <div class="service-detail-row">
+                        <span class="service-detail-label">Last Check</span>
+                        <span class="service-detail-value">${new Date(service.lastCheck).toLocaleTimeString()}</span>
+                    </div>
+                    ${service.details ? Object.entries(service.details).map(([key, value]) => `
+                    <div class="service-detail-row">
+                        <span class="service-detail-label">${key.replace('_', ' ')}</span>
+                        <span class="service-detail-value">${typeof value === 'object' ? JSON.stringify(value) : value}</span>
+                    </div>
+                    `).join('') : ''}
+                </div>
+                <div class="service-message">${service.message}</div>
+            `;
+
+            return card;
+        }
+
+        function formatUptime(seconds) {
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+
+            if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+            if (hours > 0) return `${hours}h ${minutes}m`;
+            return `${minutes}m`;
+        }
+
+        async function refreshStatus() {
+            const btn = document.getElementById('refresh-btn');
+            btn.disabled = true;
+            btn.textContent = '🔄 Refreshing...';
+
+            try {
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/admin/status/refresh', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                statusData = await response.json();
+                displayStatus(statusData);
+            } catch (error) {
+                console.error('Error refreshing status:', error);
+                alert('Error refreshing status: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔄 Refresh Now';
+            }
+        }
+
+        // Troubleshooting functions
+        function testEmergencyWA() {
+            window.open('https://emergency.wa.gov.au/data/map.incidents.json', '_blank');
+        }
+
+        function testDEAHotspots() {
+            window.open('https://hotspots.dea.ga.gov.au/geoserver/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=hotspot:hotspots&outputFormat=json&maxFeatures=10', '_blank');
+        }
+
+        function test3CXConnection() {
+            alert('3CX connection test - Check browser console for details');
+            console.log('3CX Status:', statusData?.services?.['3cx_api']);
+        }
+
+        function clearCache() {
+            if (confirm('Clear application cache? This will not log you out.')) {
+                localStorage.removeItem('dashboard-theme');
+                alert('Cache cleared successfully!');
+                location.reload();
+            }
+        }
+
+        function viewLogs() {
+            alert('Server logs are stored in the server console. Check terminal output where the server is running.');
+        }
+
+        function exportStatus() {
+            const dataStr = JSON.stringify(statusData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `system-status-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function logout() {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/admin';
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.classList.contains('theme-dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            body.classList.remove('theme-dark', 'theme-light');
+            body.classList.add(`theme-${newTheme}`);
+            localStorage.setItem('dashboard-theme', newTheme);
+
+            const icon = document.querySelector('.theme-icon');
+            icon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check auth
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = '/admin';
+                return;
+            }
+
+            // Load status
+            loadStatus();
+
+            // Start auto-refresh
+            startAutoRefresh();
+
+            // Handle page visibility
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    stopAutoRefresh();
+                } else {
+                    loadStatus();
+                    startAutoRefresh();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

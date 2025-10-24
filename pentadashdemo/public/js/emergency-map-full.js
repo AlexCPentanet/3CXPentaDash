@@ -13,7 +13,10 @@ const emergencyMapState = {
     autoRefreshEnabled: true,
     autoRefreshInterval: null,
     drawnItems: null,
-    heatmapEnabled: false
+    heatmapEnabled: false,
+    suburbLayer: null,
+    suburbBoundariesVisible: true,
+    customMarkers: []
 };
 
 // Layer Configuration with colors from Python module
@@ -70,12 +73,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load initial data
     loadEmergencyData();
+    loadPerthSuburbs();
 
     // Initialize layer controls
     initializeLayerControls();
 
     // Set up auto-refresh
     setupAutoRefresh();
+
+    // Initialize search functionality
+    initializeSuburbSearch();
+
+    // Initialize pinpoint tool
+    initializePinpointTool();
 });
 
 function initializeFullMap() {
@@ -557,6 +567,271 @@ function updateThemeIcon(theme) {
             'pentanet': '🟠'
         };
         icon.textContent = themeIcons[theme] || '☀️';
+    }
+}
+
+// =====================================================
+//  PERTH SUBURB BOUNDARIES
+// =====================================================
+
+async function loadPerthSuburbs() {
+    try {
+        const response = await fetch('/api/perth-suburbs');
+        const suburbData = await response.json();
+
+        if (emergencyMapState.suburbLayer) {
+            emergencyMapState.map.removeLayer(emergencyMapState.suburbLayer);
+        }
+
+        emergencyMapState.suburbLayer = L.geoJSON(suburbData, {
+            style: {
+                fillColor: '#4A90E2',
+                weight: 2,
+                opacity: 0.6,
+                color: '#2E5C8A',
+                fillOpacity: 0.1
+            },
+            onEachFeature: (feature, layer) => {
+                const props = feature.properties;
+                layer.bindPopup(`
+                    <div class="popup-title">📍 ${props.name}</div>
+                    <div class="popup-details">
+                        <div class="popup-detail-row">
+                            <span class="popup-detail-label">Postcode:</span>
+                            <span class="popup-detail-value">${props.postcode}</span>
+                        </div>
+                        <div class="popup-detail-row">
+                            <span class="popup-detail-label">Population:</span>
+                            <span class="popup-detail-value">${props.population.toLocaleString()}</span>
+                        </div>
+                        <div class="popup-detail-row">
+                            <span class="popup-detail-label">Coordinates:</span>
+                            <span class="popup-detail-value">${props.center_lat.toFixed(4)}, ${props.center_lon.toFixed(4)}</span>
+                        </div>
+                    </div>
+                `);
+
+                layer.on('click', function() {
+                    console.log('Suburb clicked:', props.name);
+                });
+            }
+        });
+
+        if (emergencyMapState.suburbBoundariesVisible) {
+            emergencyMapState.suburbLayer.addTo(emergencyMapState.map);
+        }
+
+        console.log('Perth suburbs loaded');
+    } catch (error) {
+        console.error('Error loading Perth suburbs:', error);
+    }
+}
+
+function toggleSuburbBoundaries() {
+    if (!emergencyMapState.suburbLayer) return;
+
+    emergencyMapState.suburbBoundariesVisible = !emergencyMapState.suburbBoundariesVisible;
+
+    if (emergencyMapState.suburbBoundariesVisible) {
+        emergencyMapState.suburbLayer.addTo(emergencyMapState.map);
+    } else {
+        emergencyMapState.map.removeLayer(emergencyMapState.suburbLayer);
+    }
+}
+
+// =====================================================
+//  SUBURB SEARCH
+// =====================================================
+
+function initializeSuburbSearch() {
+    // Add search control to sidebar
+    const sidebar = document.querySelector('.map-sidebar');
+    if (!sidebar) return;
+
+    const searchSection = document.createElement('div');
+    searchSection.className = 'sidebar-section';
+    searchSection.innerHTML = `
+        <h3>🔍 Find Location</h3>
+        <div class="suburb-search">
+            <input type="text" id="suburb-search-input" placeholder="Enter suburb name..." class="search-input">
+            <div id="suburb-search-results" class="search-results"></div>
+        </div>
+        <div class="suburb-search-controls">
+            <label class="toggle-label">
+                <input type="checkbox" id="suburb-boundaries-toggle" checked>
+                <span>Show Suburb Boundaries</span>
+            </label>
+        </div>
+    `;
+
+    // Insert after the layers section
+    const layersSection = sidebar.querySelector('.sidebar-section');
+    layersSection.after(searchSection);
+
+    // Add event listeners
+    const searchInput = document.getElementById('suburb-search-input');
+    const resultsDiv = document.getElementById('suburb-search-results');
+    const boundariesToggle = document.getElementById('suburb-boundaries-toggle');
+
+    searchInput.addEventListener('input', debounce(async function() {
+        const query = this.value.trim();
+        if (query.length < 2) {
+            resultsDiv.innerHTML = '';
+            resultsDiv.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/perth-suburbs/search?q=${encodeURIComponent(query)}`);
+            const suburbs = await response.json();
+
+            if (suburbs.length === 0) {
+                resultsDiv.innerHTML = '<div class="search-result-item">No suburbs found</div>';
+            } else {
+                resultsDiv.innerHTML = suburbs.map(suburb => `
+                    <div class="search-result-item" data-lat="${suburb.center.lat}" data-lon="${suburb.center.lon}">
+                        <strong>${suburb.name}</strong><br>
+                        <small>${suburb.postcode} • Pop: ${suburb.population.toLocaleString()}</small>
+                    </div>
+                `).join('');
+
+                // Add click handlers
+                resultsDiv.querySelectorAll('.search-result-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const lat = parseFloat(this.dataset.lat);
+                        const lon = parseFloat(this.dataset.lon);
+                        emergencyMapState.map.setView([lat, lon], 13);
+                        resultsDiv.innerHTML = '';
+                        resultsDiv.style.display = 'none';
+                        searchInput.value = '';
+                    });
+                });
+            }
+
+            resultsDiv.style.display = 'block';
+        } catch (error) {
+            console.error('Error searching suburbs:', error);
+        }
+    }, 300));
+
+    boundariesToggle.addEventListener('change', function() {
+        toggleSuburbBoundaries();
+    });
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func.apply(this, args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// =====================================================
+//  PINPOINT TOOL
+// =====================================================
+
+function initializePinpointTool() {
+    // Add pinpoint button to toolbar
+    const toolbar = document.querySelector('.map-toolbar');
+    if (!toolbar) return;
+
+    const pinpointBtn = document.createElement('button');
+    pinpointBtn.className = 'toolbar-btn';
+    pinpointBtn.title = 'Add Custom Marker';
+    pinpointBtn.innerHTML = '📍 Add Pin';
+    pinpointBtn.onclick = togglePinpointMode;
+    toolbar.appendChild(pinpointBtn);
+}
+
+let pinpointMode = false;
+
+function togglePinpointMode() {
+    pinpointMode = !pinpointMode;
+
+    const btn = document.querySelector('.toolbar-btn:last-child');
+    if (pinpointMode) {
+        btn.style.background = '#4A90E2';
+        btn.style.color = '#fff';
+        emergencyMapState.map.getContainer().style.cursor = 'crosshair';
+
+        // Add click handler to map
+        emergencyMapState.map.on('click', addCustomMarker);
+    } else {
+        btn.style.background = '';
+        btn.style.color = '';
+        emergencyMapState.map.getContainer().style.cursor = '';
+
+        // Remove click handler
+        emergencyMapState.map.off('click', addCustomMarker);
+    }
+}
+
+function addCustomMarker(e) {
+    const { lat, lng } = e.latlng;
+
+    // Prompt for marker details
+    const title = prompt('Enter marker title:', 'Custom Location');
+    if (!title) return;
+
+    const notes = prompt('Enter notes (optional):', '');
+
+    // Create custom marker
+    const marker = L.marker([lat, lng], {
+        icon: L.divIcon({
+            className: 'custom-marker-icon',
+            html: '<div style="background: #9B59B6; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-size: 16px;">📍</div>',
+            iconSize: [24, 24]
+        })
+    });
+
+    marker.bindPopup(`
+        <div class="popup-title">📍 ${title}</div>
+        <div class="popup-details">
+            <div class="popup-detail-row">
+                <span class="popup-detail-label">Latitude:</span>
+                <span class="popup-detail-value">${lat.toFixed(6)}</span>
+            </div>
+            <div class="popup-detail-row">
+                <span class="popup-detail-label">Longitude:</span>
+                <span class="popup-detail-value">${lng.toFixed(6)}</span>
+            </div>
+            ${notes ? `
+            <div class="popup-detail-row">
+                <span class="popup-detail-label">Notes:</span>
+                <span class="popup-detail-value">${notes}</span>
+            </div>
+            ` : ''}
+            <div style="margin-top: 8px;">
+                <button onclick="removeCustomMarker(${emergencyMapState.customMarkers.length})" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Remove</button>
+            </div>
+        </div>
+    `);
+
+    marker.addTo(emergencyMapState.map);
+    marker.openPopup();
+
+    emergencyMapState.customMarkers.push({
+        marker,
+        title,
+        lat,
+        lng,
+        notes
+    });
+
+    console.log('Custom marker added:', { title, lat, lng });
+}
+
+function removeCustomMarker(index) {
+    if (index >= 0 && index < emergencyMapState.customMarkers.length) {
+        const markerData = emergencyMapState.customMarkers[index];
+        emergencyMapState.map.removeLayer(markerData.marker);
+        emergencyMapState.customMarkers.splice(index, 1);
+        console.log('Custom marker removed');
     }
 }
 

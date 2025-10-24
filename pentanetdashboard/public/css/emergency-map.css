@@ -422,3 +422,131 @@ body {
         font-size: 14px;
     }
 }
+
+/* =====================================================
+   SUBURB SEARCH
+   ===================================================== */
+
+.suburb-search {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: var(--shadow-lg);
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.search-result-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background: var(--bg-hover);
+}
+
+.search-result-item strong {
+    color: var(--text-primary);
+    font-size: 13px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.search-result-item small {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.suburb-search-controls {
+    margin-top: 12px;
+}
+
+/* =====================================================
+   CUSTOM MARKERS
+   ===================================================== */
+
+.custom-marker-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.leaflet-popup button {
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.leaflet-popup button:hover {
+    opacity: 0.9;
+}
+
+/* =====================================================
+   SUBURB BOUNDARIES
+   ===================================================== */
+
+.leaflet-interactive.suburb-boundary {
+    stroke-dasharray: 5, 5;
+}
+
+/* =====================================================
+   THEME TOGGLE
+   ===================================================== */
+
+.theme-toggle {
+    padding: 8px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+}
+
+.theme-icon {
+    font-size: 16px;
+}
