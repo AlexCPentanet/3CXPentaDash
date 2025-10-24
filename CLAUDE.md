@@ -11,6 +11,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. **Pentanetdashboard** - Production-ready deployment for Pentanet
 4. **Wallboard** - Alternative wallboard implementation
 
+**Current Version:** 2.0 (Complete Overhaul - October 2025)
+**Status:** Production Ready - Migration to REST API Relay Service Planned
+
+See `FEATURES.md` for complete feature documentation and `UPDATES.md` for version history.
+
 ## Technology Stack
 
 - **Frontend**: Vanilla JavaScript (ES6+), HTML5, CSS3 (Grid/Flexbox)
@@ -344,6 +349,43 @@ Server uses JWT tokens for session management. All admin/manager routes require 
     ├── 3CX_V20_U7_Configuration_API.md
     └── 3CX_V20_U7_Call_Control_API.md
 ```
+
+## Migration Readiness
+
+**Current State (v2.0):**
+- ✅ Fully functional monolithic architecture (server + frontend bundled)
+- ✅ SQLite database with complete schema
+- ✅ Demo mode protection implemented
+- ✅ System status monitoring in place
+- ✅ Emergency data integration complete
+- ✅ All features documented in FEATURES.md
+- ✅ Comprehensive API endpoints (30+)
+- ✅ Authentication and RBAC implemented
+- ✅ Real-time updates via WebSocket + polling
+
+**Migration Target (v3.0):**
+- 🎯 Decoupled REST API relay service
+- 🎯 Static frontend deployment
+- 🎯 PostgreSQL database (production)
+- 🎯 Redis caching layer
+- 🎯 Server-Sent Events (SSE) for real-time
+- 🎯 Horizontal scalability
+- 🎯 Multi-client support
+- 🎯 Enhanced monitoring and observability
+
+**Pre-Migration Checklist:**
+- [x] Document all current features (FEATURES.md)
+- [x] Document migration architecture (CLAUDE.md)
+- [x] Create version history (UPDATES.md)
+- [ ] Create comprehensive test suite
+- [ ] Identify breaking changes
+- [ ] Plan data migration strategy
+- [ ] Set up staging environment
+- [ ] Define rollback procedures
+
+**Migration Timeline:** 6 weeks (see phased plan below)
+
+---
 
 ## REST API Relay Service Migration
 
