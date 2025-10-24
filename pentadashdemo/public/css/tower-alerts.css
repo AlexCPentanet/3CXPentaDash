@@ -22,6 +22,8 @@
     color: var(--text-primary);
 }
 
+/* stylelint-disable no-descending-specificity */
+
 /* ===== ALERT STATISTICS CARDS ===== */
 
 .alert-stats {
@@ -45,7 +47,7 @@
 }
 
 .alert-stat-card h3 {
-    margin: 0 0 10px 0;
+    margin: 0 0 10px;
     font-size: 14px;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -116,7 +118,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    border: 2px solid currentColor;
+    border: 2px solid currentcolor;
 }
 
 .tower-map {
@@ -138,7 +140,7 @@
 }
 
 .alerts-list h2 {
-    margin: 0 0 20px 0;
+    margin: 0 0 20px;
     font-size: 20px;
     color: var(--text-primary);
 }
@@ -201,17 +203,17 @@
 }
 
 .alert-badge.fire {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgb(239 68 68 / 20%);
     color: #ef4444;
 }
 
 .alert-badge.power {
-    background: rgba(245, 158, 11, 0.2);
+    background: rgb(245 158 11 / 20%);
     color: #f59e0b;
 }
 
 .alert-badge.resolved {
-    background: rgba(34, 197, 94, 0.2);
+    background: rgb(34 197 94 / 20%);
     color: #22c55e;
 }
 
@@ -249,7 +251,7 @@
 }
 
 .affected-services h4 {
-    margin: 0 0 10px 0;
+    margin: 0 0 10px;
     font-size: 14px;
     color: var(--text-secondary);
 }
@@ -415,7 +417,7 @@
 
 /* ===== RESPONSIVE ===== */
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .sidebar {
         transform: translateX(-100%);
     }

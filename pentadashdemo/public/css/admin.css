@@ -92,9 +92,11 @@
 
 .admin-tab {
     display: none;
-    animation: fadeIn 0.3s ease-in;
+    animation: fade-in 0.3s ease-in;
 }
 
+
+/* stylelint-disable no-descending-specificity */
 .admin-tab.active {
     display: block;
 }
@@ -288,20 +290,20 @@
 }
 
 .test-result.success {
-    background: rgba(0, 196, 140, 0.1);
-    border: 1px solid rgba(0, 196, 140, 0.3);
+    background: rgb(0 196 140 / 10%);
+    border: 1px solid rgb(0 196 140 / 30%);
     color: var(--color-success);
 }
 
 .test-result.error {
-    background: rgba(244, 67, 54, 0.1);
-    border: 1px solid rgba(244, 67, 54, 0.3);
+    background: rgb(244 67 54 / 10%);
+    border: 1px solid rgb(244 67 54 / 30%);
     color: var(--color-danger);
 }
 
 .test-result.loading {
-    background: rgba(0, 163, 224, 0.1);
-    border: 1px solid rgba(0, 163, 224, 0.3);
+    background: rgb(0 163 224 / 10%);
+    border: 1px solid rgb(0 163 224 / 30%);
     color: var(--color-secondary);
 }
 
@@ -428,7 +430,7 @@
 }
 
 .recipient-tag .remove:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(255 255 255 / 20%);
 }
 
 /* =====================================================
@@ -514,22 +516,22 @@
 }
 
 .data-table .badge.success {
-    background: rgba(0, 196, 140, 0.15);
+    background: rgb(0 196 140 / 15%);
     color: var(--color-success);
 }
 
 .data-table .badge.warning {
-    background: rgba(255, 152, 0, 0.15);
+    background: rgb(255 152 0 / 15%);
     color: var(--color-warning);
 }
 
 .data-table .badge.danger {
-    background: rgba(244, 67, 54, 0.15);
+    background: rgb(244 67 54 / 15%);
     color: var(--color-danger);
 }
 
 .data-table .badge.info {
-    background: rgba(0, 163, 224, 0.15);
+    background: rgb(0 163 224 / 15%);
     color: var(--color-secondary);
 }
 
@@ -586,7 +588,7 @@
 
 .permission-card.highlighted {
     border-color: var(--color-primary);
-    background: linear-gradient(135deg, var(--bg-panel), rgba(0, 82, 204, 0.05));
+    background: linear-gradient(135deg, var(--bg-panel), rgb(0 82 204 / 5%));
 }
 
 .permission-card h3 {
@@ -826,26 +828,26 @@
 }
 
 .alert-info {
-    background: rgba(0, 163, 224, 0.1);
-    border: 1px solid rgba(0, 163, 224, 0.3);
+    background: rgb(0 163 224 / 10%);
+    border: 1px solid rgb(0 163 224 / 30%);
     color: var(--color-secondary);
 }
 
 .alert-success {
-    background: rgba(0, 196, 140, 0.1);
-    border: 1px solid rgba(0, 196, 140, 0.3);
+    background: rgb(0 196 140 / 10%);
+    border: 1px solid rgb(0 196 140 / 30%);
     color: var(--color-success);
 }
 
 .alert-warning {
-    background: rgba(255, 152, 0, 0.1);
-    border: 1px solid rgba(255, 152, 0, 0.3);
+    background: rgb(255 152 0 / 10%);
+    border: 1px solid rgb(255 152 0 / 30%);
     color: var(--color-warning);
 }
 
 .alert-danger {
-    background: rgba(244, 67, 54, 0.1);
-    border: 1px solid rgba(244, 67, 54, 0.3);
+    background: rgb(244 67 54 / 10%);
+    border: 1px solid rgb(244 67 54 / 30%);
     color: var(--color-danger);
 }
 
@@ -908,7 +910,7 @@
    RESPONSIVE
    ===================================================== */
 
-@media (max-width: 1024px) {
+@media (width <= 1024px) {
     .admin-layout {
         flex-direction: column;
     }
@@ -933,7 +935,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .stats-grid {
         grid-template-columns: 1fr;
     }
@@ -965,17 +967,17 @@
 
 .status-dot.success {
     background: var(--color-success);
-    box-shadow: 0 0 8px rgba(0, 196, 140, 0.5);
+    box-shadow: 0 0 8px rgb(0 196 140 / 50%);
 }
 
 .status-dot.danger {
     background: var(--color-danger);
-    box-shadow: 0 0 8px rgba(244, 67, 54, 0.5);
+    box-shadow: 0 0 8px rgb(244 67 54 / 50%);
 }
 
 .status-dot.warning {
     background: var(--color-warning);
-    box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+    box-shadow: 0 0 8px rgb(255 152 0 / 50%);
 }
 
 .status-dot.loading {
@@ -987,6 +989,7 @@
     0%, 100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0.5;
     }
@@ -996,11 +999,12 @@
    ANIMATIONS
    ===================================================== */
 
-@keyframes fadeIn {
+@keyframes fade-in {
     from {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

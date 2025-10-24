@@ -17,72 +17,64 @@
     --color-success: #00C48C;
     --color-warning: #FF9800;
     --color-danger: #F44336;
-
     --bg-main: #0A0E14;
     --bg-surface: #141B24;
     --bg-panel: #1A2332;
     --bg-hover: #2D3748;
-
     --border-color: #2D3748;
     --text-primary: #E2E8F0;
     --text-secondary: #A0AEC0;
     --text-muted: #718096;
-
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 2px 4px rgb(0 0 0 / 20%);
+    --shadow-md: 0 4px 8px rgb(0 0 0 / 30%);
+    --shadow-lg: 0 8px 16px rgb(0 0 0 / 40%);
 }
 
 .theme-light {
     --color-primary: #0052CC;
     --color-primary-hover: #003D99;
     --color-secondary: #00A3E0;
-    --color-accent: #0066FF;
+    --color-accent: #06F;
     --color-info: #3b82f6;
     --color-success: #00A86B;
     --color-warning: #F57C00;
     --color-danger: #D32F2F;
-
     --bg-main: #F7FAFC;
-    --bg-surface: #FFFFFF;
-    --bg-panel: #FFFFFF;
+    --bg-surface: #FFF;
+    --bg-panel: #FFF;
     --bg-hover: #EDF2F7;
-
     --border-color: #E2E8F0;
     --text-primary: #1A202C;
     --text-secondary: #4A5568;
     --text-muted: #718096;
-
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.12);
+    --shadow-sm: 0 2px 4px rgb(0 0 0 / 5%);
+    --shadow-md: 0 4px 8px rgb(0 0 0 / 8%);
+    --shadow-lg: 0 8px 16px rgb(0 0 0 / 12%);
 }
 
 .theme-pentanet {
     /* Pentanet Brand Colors */
-    --color-primary: #FF6600;        /* Pentanet Orange */
+    --color-primary: #F60;        /* Pentanet Orange */
     --color-primary-hover: #E65500;  /* Darker Orange for hover states */
     --color-secondary: #E65500;      /* Darker Orange */
-    --color-accent: #FF8833;         /* Lighter Orange accent */
-    --color-info: #FF9944;           /* Orange-tinted info */
+    --color-accent: #F83;         /* Lighter Orange accent */
+    --color-info: #F94;           /* Orange-tinted info */
     --color-success: #00C48C;
     --color-warning: #FFA500;
-    --color-danger: #FF4444;
+    --color-danger: #F44;
 
     /* Dark grey backgrounds with orange accents */
     --bg-main: #1a1a1a;              /* Dark charcoal grey */
     --bg-surface: #252525;           /* Slightly lighter grey */
     --bg-panel: #2a2a2a;             /* Panel grey */
-    --bg-hover: #333333;             /* Hover grey */
-
+    --bg-hover: #333;             /* Hover grey */
     --border-color: #404040;         /* Grey borders */
-    --text-primary: #FFFFFF;         /* White text */
-    --text-secondary: #CCCCCC;       /* Light grey text */
-    --text-muted: #999999;           /* Muted grey text */
-
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 16px rgba(255, 102, 0, 0.2);  /* Orange-tinted shadow */
+    --text-primary: #FFF;         /* White text */
+    --text-secondary: #CCC;       /* Light grey text */
+    --text-muted: #999;           /* Muted grey text */
+    --shadow-sm: 0 2px 4px rgb(0 0 0 / 30%);
+    --shadow-md: 0 4px 8px rgb(0 0 0 / 40%);
+    --shadow-lg: 0 8px 16px rgb(255 102 0 / 20%);  /* Orange-tinted shadow */
 }
 
 /* =====================================================
@@ -302,16 +294,17 @@ body {
     gap: 20px;
 }
 
-@media (max-width: 1600px) {
+@media (width <= 1600px) {
     .content-grid {
         grid-template-columns: 1fr 1fr;
     }
+
     .right-column {
         grid-column: 1 / -1;
     }
 }
 
-@media (max-width: 1024px) {
+@media (width <= 1024px) {
     .content-grid {
         grid-template-columns: 1fr;
     }
@@ -411,17 +404,17 @@ body {
 }
 
 .queue-priority.high {
-    background: rgba(244, 67, 54, 0.15);
+    background: rgb(244 67 54 / 15%);
     color: var(--color-danger);
 }
 
 .queue-priority.medium {
-    background: rgba(255, 152, 0, 0.15);
+    background: rgb(255 152 0 / 15%);
     color: var(--color-warning);
 }
 
 .queue-priority.low {
-    background: rgba(0, 163, 224, 0.15);
+    background: rgb(0 163 224 / 15%);
     color: var(--color-secondary);
 }
 
@@ -606,14 +599,15 @@ body {
     margin-bottom: 10px;
     border-radius: 4px;
     transition: all 0.2s;
-    animation: slideIn 0.3s ease-out;
+    animation: slide-in 0.3s ease-out;
 }
 
-@keyframes slideIn {
+@keyframes slide-in {
     from {
         opacity: 0;
         transform: translateX(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -770,14 +764,6 @@ body {
     border-bottom: none;
 }
 
-.status-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    color: var(--text-primary);
-}
-
 .status-dot {
     width: 10px;
     height: 10px;
@@ -865,6 +851,11 @@ body {
 }
 
 .status-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
@@ -919,7 +910,7 @@ body {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 2px solid currentColor;
+    border: 2px solid currentcolor;
 }
 
 .header-actions {
@@ -954,11 +945,8 @@ body {
 .modal {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    inset: 0;
+    background: rgb(0 0 0 / 70%);
     backdrop-filter: blur(4px);
     z-index: 1000;
     align-items: center;
@@ -1040,7 +1028,7 @@ body {
 }
 
 .form-error {
-    background: rgba(244, 67, 54, 0.1);
+    background: rgb(244 67 54 / 10%);
     border: 1px solid var(--color-danger);
     color: var(--color-danger);
     padding: 12px 16px;
@@ -1074,7 +1062,7 @@ body {
    RESPONSIVE DESIGN
    ===================================================== */
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .dashboard-container {
         padding: 10px;
         padding-bottom: 60px;

@@ -42,13 +42,13 @@
     --radius-lg: 6px;
 
     /* Shadows - Grafana Style */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+    --shadow-md: 0 4px 8px rgb(0 0 0 / 40%);
+    --shadow-lg: 0 8px 16px rgb(0 0 0 / 50%);
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--background-color);
     color: var(--text-primary);
     line-height: 1.5;
@@ -201,17 +201,17 @@ body {
 
 .kpi-change.positive {
     color: var(--success-color);
-    background: rgba(115, 191, 105, 0.15);
+    background: rgb(115 191 105 / 15%);
 }
 
 .kpi-change.negative {
     color: var(--danger-color);
-    background: rgba(242, 73, 92, 0.15);
+    background: rgb(242 73 92 / 15%);
 }
 
 .kpi-change.neutral {
     color: var(--text-secondary);
-    background: rgba(158, 162, 168, 0.15);
+    background: rgb(158 162 168 / 15%);
 }
 
 /* Stats Row - Service Level, Daily Stats, Sentiment Meter */
@@ -328,22 +328,22 @@ body {
 }
 
 .daily-stat-icon.success {
-    background: rgba(115, 191, 105, 0.15);
+    background: rgb(115 191 105 / 15%);
     color: var(--success-color);
 }
 
 .daily-stat-icon.danger {
-    background: rgba(242, 73, 92, 0.15);
+    background: rgb(242 73 92 / 15%);
     color: var(--danger-color);
 }
 
 .daily-stat-icon.info {
-    background: rgba(87, 148, 242, 0.15);
+    background: rgb(87 148 242 / 15%);
     color: var(--info-color);
 }
 
 .daily-stat-icon.warning {
-    background: rgba(255, 152, 48, 0.15);
+    background: rgb(255 152 48 / 15%);
     color: var(--warning-color);
 }
 
@@ -560,22 +560,22 @@ body {
 }
 
 .agent-status-badge.available {
-    background: rgba(115, 191, 105, 0.2);
+    background: rgb(115 191 105 / 20%);
     color: var(--success-color);
 }
 
 .agent-status-badge.on-call {
-    background: rgba(87, 148, 242, 0.2);
+    background: rgb(87 148 242 / 20%);
     color: var(--info-color);
 }
 
 .agent-status-badge.break {
-    background: rgba(255, 152, 48, 0.2);
+    background: rgb(255 152 48 / 20%);
     color: var(--warning-color);
 }
 
 .agent-status-badge.away {
-    background: rgba(110, 113, 120, 0.2);
+    background: rgb(110 113 120 / 20%);
     color: var(--text-muted);
 }
 
@@ -636,7 +636,7 @@ body {
     border-left: 3px solid var(--border-color);
     border-radius: var(--radius-sm);
     transition: all 0.2s ease;
-    animation: slideIn 0.3s ease-out;
+    animation: slide-in 0.3s ease-out;
 }
 
 .activity-item.inbound {
@@ -656,7 +656,7 @@ body {
 }
 
 .activity-item:hover {
-    background: rgba(87, 148, 242, 0.1);
+    background: rgb(87 148 242 / 10%);
 }
 
 .activity-header {
@@ -683,12 +683,12 @@ body {
 }
 
 .activity-type-badge.inbound {
-    background: rgba(87, 148, 242, 0.2);
+    background: rgb(87 148 242 / 20%);
     color: var(--info-color);
 }
 
 .activity-type-badge.outbound {
-    background: rgba(255, 152, 48, 0.2);
+    background: rgb(255 152 48 / 20%);
     color: var(--warning-color);
 }
 
@@ -784,17 +784,17 @@ body {
 }
 
 .queue-priority.high {
-    background: rgba(242, 73, 92, 0.2);
+    background: rgb(242 73 92 / 20%);
     color: var(--danger-color);
 }
 
 .queue-priority.medium {
-    background: rgba(255, 152, 48, 0.2);
+    background: rgb(255 152 48 / 20%);
     color: var(--warning-color);
 }
 
 .queue-priority.low {
-    background: rgba(115, 191, 105, 0.2);
+    background: rgb(115 191 105 / 20%);
     color: var(--success-color);
 }
 
@@ -890,27 +890,30 @@ body {
     0%, 100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0.5;
     }
 }
 
-@keyframes slideIn {
+@keyframes slide-in {
     from {
         opacity: 0;
         transform: translateX(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
     }
 }
 
-@keyframes fadeIn {
+@keyframes fade-in {
     from {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -918,7 +921,7 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 1400px) {
+@media (width <= 1400px) {
     .main-content-grid {
         grid-template-columns: 1fr;
     }
@@ -928,7 +931,7 @@ body {
     }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .wallboard-header {
         flex-direction: column;
         gap: var(--spacing-md);

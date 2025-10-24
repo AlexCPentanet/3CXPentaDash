@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "stylelint-config-standard"
+  ],
+  "rules": {
+    "at-rule-no-unknown": [true, { "ignoreAtRules": ["keyframes", "include", "mixin"] }],
+    "selector-type-no-unknown": [true, { "ignoreTypes": ["/^(div|span|i)$/"] }]
+  }
+}
